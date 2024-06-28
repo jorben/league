@@ -1,0 +1,18 @@
+
+db:
+  dsn: "dbuser:dbpwd@tcp(localhost:3306)/db_name?charset=utf8mb4&parseTime=True&loc=Local"
+
+log:
+  - writer: console
+    formatter: json
+    level: DEBUG
+  - writer: file
+    formatter: json
+    level: DEBUG
+    format_config:
+      time_fmt: "2006-01-02 15:04:05.000"
+    write_config:
+      log_path: "./run.log"
+      max_size: 10
+      max_age: 30
+      compress: true
