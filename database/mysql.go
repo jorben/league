@@ -23,6 +23,40 @@ type MyGormLogger struct {
 	LogLevel logger.LogLevel
 }
 
+// InitMysql 新建mysql连接实例
+func InitMysql(cfg config.DbConfig) (err error) {
+
+	mysqlInstance, err = gorm.Open(mysql.Open(cfg.Dsn), &gorm.Config{
+		Logger: &MyGormLogger{LogLevel: logger.Info},
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix:   "t_",
+			SingularTable: true,
+		},
+	})
+	if err != nil {
+		return
+	}
+
+	sqlDB, err := mysqlInstance.DB()
+	if err != nil {
+		return
+	}
+
+	sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
+	sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
+	sqlDB.SetConnMaxLifetime(time.Duration(cfg.ConnMaxLifetime) * time.Minute)
+
+	return sqlDB.Ping()
+}
+
+// Close 关闭mysql连接
+func Close() {
+	if sqlDB, err := mysqlInstance.DB(); err == nil {
+		_ = sqlDB.Close()
+	}
+
+}
+
 func (g MyGormLogger) LogMode(level logger.LogLevel) logger.Interface {
 	newlogger := g
 	newlogger.LogLevel = level
@@ -59,38 +93,4 @@ func (g MyGormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql
 		).Debug("SQL Trace")
 	}
 	return
-}
-
-// InitMysql 新建mysql连接实例
-func InitMysql(cfg config.DbConfig) (err error) {
-
-	mysqlInstance, err = gorm.Open(mysql.Open(cfg.Dsn), &gorm.Config{
-		Logger: &MyGormLogger{LogLevel: logger.Info},
-		NamingStrategy: schema.NamingStrategy{
-			TablePrefix:   "t_",
-			SingularTable: true,
-		},
-	})
-	if err != nil {
-		return
-	}
-
-	sqlDB, err := mysqlInstance.DB()
-	if err != nil {
-		return
-	}
-
-	sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
-	sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
-	sqlDB.SetConnMaxLifetime(time.Duration(cfg.ConnMaxLifetime) * time.Minute)
-
-	return sqlDB.Ping()
-}
-
-// Close 关闭mysql连接
-func Close() {
-	if sqlDB, err := mysqlInstance.DB(); err == nil {
-		_ = sqlDB.Close()
-	}
-
 }

@@ -36,7 +36,7 @@ func main() {
 
 	// 构建Gin实例
 	s := gin.New()
-	s.Use(middleware.Logger(), gin.Recovery())
+	s.Use(middleware.Logger(), middleware.Auth(), gin.Recovery())
 
 	// 注册路由
 	router.SetupRouter(s)

@@ -7,5 +7,6 @@ func AutoMigrate() error {
 	return database.GetInstance().AutoMigrate(
 		User{},
 		UserSocialInfo{},
+		CasbinRule{},
 	)
 }

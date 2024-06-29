@@ -13,18 +13,20 @@ import (
 )
 
 type AuthService struct {
-	Ctx     *gin.Context
-	UserDal *dal.UserDal
-	signKey []byte
+	Ctx       *gin.Context
+	UserDal   *dal.UserDal
+	CasbinDal *dal.CasbinDal
+	signKey   []byte
 }
 
 // NewAuthService 新建AuthService实例
 func NewAuthService(ctx *gin.Context) *AuthService {
 
 	return &AuthService{
-		Ctx:     ctx,
-		UserDal: dal.NewUserDal(),
-		signKey: []byte(config.GetConfig().Jwt.SignKey),
+		Ctx:       ctx,
+		UserDal:   dal.NewUserDal(),
+		CasbinDal: dal.NewCasbinDal(),
+		signKey:   []byte(config.GetConfig().Jwt.SignKey),
 	}
 }
 
@@ -50,6 +52,18 @@ func (a *AuthService) LoginBySource(info model.UserSocialInfo) (string, error) {
 		return a.SignJwtString(user.BindUserId)
 	}
 
+}
+
+// IsAllow 权限校验
+func (a *AuthService) IsAllow(userId string, path string, method string) bool {
+	req := model.CasbinReq{
+		UserId: userId,
+		Path:   path,
+		Method: method,
+	}
+	isAllow := a.CasbinDal.IsAllow(req)
+	log.WithField("UserId", userId, "Path", path, "Method", method).Debugf("IsAllow: %v", isAllow)
+	return isAllow
 }
 
 // SignJwtString 签发JWT

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"league/log"
 	"league/service"
 	"net/http"
 )
@@ -10,20 +11,31 @@ import (
 func Auth() gin.HandlerFunc {
 	// TODO: 接入RBAC
 	return func(ctx *gin.Context) {
+		var userId string
 		tokenString := ctx.GetHeader("x-token")
-		if len(tokenString) == 0 {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"ret": -1, "msg": "x-token header is empty"})
-			ctx.Abort()
-		} else {
-			authService := service.NewAuthService(ctx)
-			if userId, err := authService.VerifyJwtString(tokenString); err != nil {
-				ctx.JSON(http.StatusUnauthorized, gin.H{"ret": -1, "msg": "no login"})
-				ctx.Abort()
-			} else {
-				ctx.Set("userId", userId)
-				ctx.Next()
-			}
+		authService := service.NewAuthService(ctx)
+
+		if len(tokenString) > 0 {
+			userId, _ = authService.VerifyJwtString(tokenString)
 		}
-		return
+		ctx.Set("userId", userId)
+
+		// 校验权限
+		path := ctx.Request.URL.Path
+		method := ctx.Request.Method
+		if isAllow := authService.IsAllow(userId, path, method); isAllow {
+			log.WithField("UserId", userId, "Path", path, "Method", method).Debugf("Passed the permission check")
+			ctx.Next()
+		} else {
+			if len(userId) > 0 {
+				// 有登录 无权限
+				ctx.JSON(http.StatusOK, gin.H{"ret": -1, "msg": "Unauthorized"})
+			} else {
+				// 未登录
+				ctx.JSON(http.StatusOK, gin.H{"ret": -1, "msg": "Login required"})
+			}
+			ctx.Abort()
+
+		}
 	}
 }
