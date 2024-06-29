@@ -12,17 +12,16 @@ func Logger() gin.HandlerFunc {
 		start := time.Now()
 		traceId := uuid.New().String()
 		ctx.Set("TraceId", traceId)
-		path := ctx.Request.URL.Path
-		query := ctx.Request.URL.RawQuery
 		// 记录Req
 		log.WithField(
 			"TraceId", traceId,
 			"Method", ctx.Request.Method,
-			"Path", path,
+			"Path", ctx.Request.URL.Path,
+			"Query", ctx.Request.URL.RawQuery,
 			"Ip", ctx.ClientIP(),
-			"Query", query,
-			"UserAgent", ctx.Request.UserAgent(),
+			//"UserAgent", ctx.Request.UserAgent(),
 		).Info("Request")
+
 		ctx.Next()
 
 		cost := time.Since(start)
@@ -30,7 +29,7 @@ func Logger() gin.HandlerFunc {
 		log.WithField(
 			"TraceId", traceId,
 			"Method", ctx.Request.Method,
-			"Path", path,
+			"Path", ctx.Request.URL.Path,
 			"Status", ctx.Writer.Status(),
 			"Cost", cost,
 			"Errors", ctx.Errors.ByType(gin.ErrorTypePrivate).String(),

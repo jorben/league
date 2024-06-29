@@ -6,31 +6,44 @@ import (
 	"league/log"
 )
 
-type LeagueConfig struct {
-	Db struct {
-		Dsn string `yaml:"dsn"`
-	} `yaml:"db"`
-	Log []log.OutputConfig `yaml:"log"`
+type OAuthConfig struct {
+	Source       string `yaml:"source"`
+	ClientId     string `yaml:"client_id"`
+	ClientSecret string `yaml:"client_secret"`
+	CallbackUri  string `yaml:"callback_uri"`
 }
 
-// GetConfig 获取解析好的配置
-func GetConfig(path string) (*LeagueConfig, error) {
-	raw := conf.GetGlobalConfig()
-	if raw != nil {
-		return raw.(*LeagueConfig), nil
-	}
-	cfg := loadConfig(path)
-	if cfg == nil {
+type DbConfig struct {
+	Dsn             string `yaml:"dsn"`
+	MaxOpenConns    int    `yaml:"max_open_conns"`
+	MaxIdleConns    int    `yaml:"max_idle_conns"`
+	ConnMaxLifetime int    `yaml:"conn_max_lifetime"`
+	CheckInterval   int    `yaml:"check_interval"`
+}
+
+type LeagueConfig struct {
+	Db   DbConfig           `yaml:"db"`
+	Auth []OAuthConfig      `yaml:"auth"`
+	Log  []log.OutputConfig `yaml:"log"`
+	Jwt  struct {
+		SignKey string `yaml:"sign_key"`
+	} `yaml:"jwt"`
+}
+
+var leagueConfig *LeagueConfig
+
+// GetConfig 获取配置实例
+func GetConfig() *LeagueConfig {
+	return leagueConfig
+}
+
+// LoadConfig 解析配置
+func LoadConfig(path string) (*LeagueConfig, error) {
+	leagueConfig = &LeagueConfig{}
+	if err := conf.LoadAndDecode(path, leagueConfig); err != nil {
+
 		return nil, errors.New("configuration is empty, please check the config file path")
 	}
-	return cfg, nil
-}
-
-func loadConfig(path string) *LeagueConfig {
-	cfg := &LeagueConfig{}
-	if err := conf.LoadAndDecode(path, cfg); err != nil {
-		return nil
-	}
-	conf.SetGlobalConfig(cfg)
-	return cfg
+	//conf.SetGlobalConfig(leagueConfig)
+	return leagueConfig, nil
 }
