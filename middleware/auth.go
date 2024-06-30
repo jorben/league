@@ -9,7 +9,6 @@ import (
 
 // Auth 登录态校验
 func Auth() gin.HandlerFunc {
-	// TODO: 接入RBAC
 	return func(ctx *gin.Context) {
 		var userId string
 		tokenString := ctx.GetHeader("X-Token")

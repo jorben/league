@@ -13,8 +13,8 @@ func SetupRouter(s *gin.Engine) {
 		ctx.JSON(http.StatusOK, gin.H{"ret": 0, "msg": "ok"})
 	})
 
-	s.GET("/auth/github_login", auth.LoginGithub)
+	s.GET("/auth/login_github", auth.LoginGithub)
 
-	s.GET("/auth/github_callback", auth.CallbackGithub)
+	s.GET("/auth/callback_github", auth.CallbackGithub)
 
 }
