@@ -30,6 +30,14 @@ type LeagueConfig struct {
 	} `yaml:"jwt"`
 }
 
+// CasbinDefaultPolicies 默认策略，当策略表为空时会初始化以下策略
+var CasbinDefaultPolicies = [][]string{
+	{"anyone", "/health", "GET", "allow"},
+	{"anyone", "/auth/login*", "GET", "allow"},
+	{"anyone", "/auth/callback*", "GET", "allow"},
+	{"member", "/auth/renew*", "GET", "allow"},
+}
+
 var leagueConfig *LeagueConfig
 
 // GetConfig 获取配置实例

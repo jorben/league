@@ -23,15 +23,13 @@ func main() {
 	// 连接DB
 	err = database.InitMysql(cfg.Db)
 	if err != nil {
-		log.Errorf(nil, "Connect database failed, err: %s", err.Error())
-		return
+		panic(err)
 	}
 	defer database.Close()
 
 	// 同步schema
 	if err := model.AutoMigrate(); err != nil {
-		log.Errorf(nil, "Auto migrate schema failed, err: %s", err.Error())
-		return
+		panic(err)
 	}
 
 	// 构建Gin实例
@@ -43,7 +41,7 @@ func main() {
 
 	// 启动服务
 	if err := s.Run(":8080"); err != nil {
-		log.Errorf(nil, "Run gin server failed, err: %s", err.Error())
+		panic(err)
 		return
 	}
 }
