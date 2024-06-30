@@ -65,20 +65,20 @@ func (g MyGormLogger) LogMode(level logger.LogLevel) logger.Interface {
 
 func (g MyGormLogger) Info(ctx context.Context, s string, i ...interface{}) {
 	if g.LogLevel >= logger.Info {
-		log.Infof(s, i...)
+		log.Infof(ctx, s, i...)
 	}
 
 }
 
 func (g MyGormLogger) Warn(ctx context.Context, s string, i ...interface{}) {
 	if g.LogLevel >= logger.Warn {
-		log.Warnf(s, i...)
+		log.Warnf(ctx, s, i...)
 	}
 }
 
 func (g MyGormLogger) Error(ctx context.Context, s string, i ...interface{}) {
 	if g.LogLevel >= logger.Error {
-		log.Errorf(s, i...)
+		log.Errorf(ctx, s, i...)
 	}
 }
 
@@ -86,7 +86,7 @@ func (g MyGormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql
 	if g.LogLevel >= logger.Info {
 		elapsed := time.Since(begin)
 		sql, rows := fc()
-		log.WithField(
+		log.WithField(ctx,
 			"Sql", sql,
 			"Rows", rows,
 			"Cost", fmt.Sprintf("%.3fms", float64(elapsed.Nanoseconds())/1e6),

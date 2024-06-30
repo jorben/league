@@ -24,8 +24,8 @@ func NewAuthService(ctx *gin.Context) *AuthService {
 
 	return &AuthService{
 		Ctx:       ctx,
-		UserDal:   dal.NewUserDal(),
-		CasbinDal: dal.NewCasbinDal(),
+		UserDal:   dal.NewUserDal(ctx),
+		CasbinDal: dal.NewCasbinDal(ctx),
 		signKey:   []byte(config.GetConfig().Jwt.SignKey),
 	}
 }
@@ -38,7 +38,7 @@ func (a *AuthService) LoginBySource(info model.UserSocialInfo) (string, error) {
 		// 不存在则插入用户
 		id, err := a.UserDal.SignUpBySource(info)
 		if err != nil {
-			log.Errorf("UserDal.SignUpBySource failed, err: %s", err.Error())
+			log.Errorf(a.Ctx, "UserDal.SignUpBySource failed, err: %s", err.Error())
 			return "", err
 		}
 		return a.SignJwtString(id)
@@ -46,7 +46,7 @@ func (a *AuthService) LoginBySource(info model.UserSocialInfo) (string, error) {
 		// 存在则更新信息
 		_, err := a.UserDal.UpdateBySource(info)
 		if err != nil {
-			log.Errorf("UserDal.UpdateBySource failed, err: %s", err.Error())
+			log.Errorf(a.Ctx, "UserDal.UpdateBySource failed, err: %s", err.Error())
 			return "", nil
 		}
 		return a.SignJwtString(user.BindUserId)
@@ -62,7 +62,7 @@ func (a *AuthService) IsAllow(userId string, path string, method string) bool {
 		Method: method,
 	}
 	isAllow := a.CasbinDal.IsAllow(req)
-	log.WithField("UserId", userId, "Path", path, "Method", method).Debugf("IsAllow: %v", isAllow)
+	log.WithField(a.Ctx, "Path", path, "Method", method).Debugf("IsAllow: %v", isAllow)
 	return isAllow
 }
 
@@ -79,7 +79,7 @@ func (a *AuthService) SignJwtString(id uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS384, claims)
 	sign, err := token.SignedString(a.signKey)
 	if err != nil {
-		log.Errorf("Jwt SignedString failed, err: %s", err.Error())
+		log.Errorf(a.Ctx, "Jwt SignedString failed, err: %s", err.Error())
 	}
 	return sign, err
 }
@@ -91,13 +91,13 @@ func (a *AuthService) VerifyJwtString(s string) (string, error) {
 		return a.signKey, nil
 	})
 	if err != nil {
-		log.Errorf("Jwt parse failed, err: %s", err.Error())
+		log.Errorf(a.Ctx, "Jwt parse failed, err: %s", err.Error())
 		return "", err
 	} else if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok {
-		log.WithField("UserId", claims.ID).Debugf("check login passed")
+		log.Debugf(a.Ctx, "Check login passed, UserId: %s", claims.ID)
 		return claims.ID, nil
 	} else {
-		log.Errorf("Unknown claims type, token: %s", s)
+		log.Errorf(a.Ctx, "Unknown claims type, token: %s", s)
 		return "", errors.New("unknown claims type")
 	}
 }

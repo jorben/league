@@ -23,27 +23,27 @@ func main() {
 	// 连接DB
 	err = database.InitMysql(cfg.Db)
 	if err != nil {
-		log.Errorf("Connect database failed, err: %s", err.Error())
+		log.Errorf(nil, "Connect database failed, err: %s", err.Error())
 		return
 	}
 	defer database.Close()
 
 	// 同步schema
 	if err := model.AutoMigrate(); err != nil {
-		log.Errorf("Auto migrate schema failed, err: %s", err.Error())
+		log.Errorf(nil, "Auto migrate schema failed, err: %s", err.Error())
 		return
 	}
 
 	// 构建Gin实例
 	s := gin.New()
-	s.Use(middleware.Logger(), middleware.Auth(), gin.Recovery())
+	s.Use(middleware.RequestId(), middleware.Logger(), middleware.Auth(), gin.Recovery())
 
 	// 注册路由
 	router.SetupRouter(s)
 
 	// 启动服务
 	if err := s.Run(":8080"); err != nil {
-		log.Errorf("Run gin server failed, err: %s", err.Error())
+		log.Errorf(nil, "Run gin server failed, err: %s", err.Error())
 		return
 	}
 }

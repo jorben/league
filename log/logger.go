@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -72,6 +73,14 @@ func GetLogger() *zap.SugaredLogger {
 	return logger
 }
 
+// GetLoggerWithContext 获取logger 携带链路信息
+func GetLoggerWithContext(ctx context.Context) *zap.SugaredLogger {
+	if ctx != nil {
+		return logger.With("TraceId", ctx.Value("TraceId"), "UserId", ctx.Value("UserId"))
+	}
+	return logger
+}
+
 // InitLogger 初始化日志组件
 func InitLogger(opc []OutputConfig) {
 
@@ -92,113 +101,59 @@ func InitLogger(opc []OutputConfig) {
 
 }
 
-// Wrapper 代理logger，使得With与Debug等日志调用栈层数一致
-type Wrapper struct {
-	l *zap.SugaredLogger
-}
-
 // Fatal 日志
-func Fatal(args ...interface{}) {
-	logger.Fatal(args...)
+func Fatal(ctx context.Context, args ...interface{}) {
+	GetLoggerWithContext(ctx).Fatal(args...)
 }
 
 // Fatalf printf风格的日志
-func Fatalf(format string, args ...interface{}) {
-	logger.Fatalf(format, args...)
+func Fatalf(ctx context.Context, format string, args ...interface{}) {
+	GetLoggerWithContext(ctx).Fatalf(format, args...)
 }
 
 // Error 日志
-func Error(args ...interface{}) {
-	logger.Error(args...)
+func Error(ctx context.Context, args ...interface{}) {
+	GetLoggerWithContext(ctx).Error(args...)
 }
 
 // Errorf printf风格的日志
-func Errorf(format string, args ...interface{}) {
-	logger.Errorf(format, args...)
+func Errorf(ctx context.Context, format string, args ...interface{}) {
+	GetLoggerWithContext(ctx).Errorf(format, args...)
 }
 
 // Warn 日志
-func Warn(args ...interface{}) {
-	logger.Warn(args...)
+func Warn(ctx context.Context, args ...interface{}) {
+	GetLoggerWithContext(ctx).Warn(args...)
 }
 
 // Warnf printf风格的日志
-func Warnf(format string, args ...interface{}) {
-	logger.Warnf(format, args...)
+func Warnf(ctx context.Context, format string, args ...interface{}) {
+	GetLoggerWithContext(ctx).Warnf(format, args...)
 }
 
 // Info 日志
-func Info(args ...interface{}) {
-	logger.Info(args...)
+func Info(ctx context.Context, args ...interface{}) {
+	GetLoggerWithContext(ctx).Info(args...)
 }
 
 // Infof printf风格的日志
-func Infof(format string, args ...interface{}) {
-	logger.Infof(format, args...)
+func Infof(ctx context.Context, format string, args ...interface{}) {
+	GetLoggerWithContext(ctx).Infof(format, args...)
 }
 
 // Debug 日志
-func Debug(args ...interface{}) {
-	logger.Debug(args...)
+func Debug(ctx context.Context, args ...interface{}) {
+	GetLoggerWithContext(ctx).Debug(args...)
 }
 
 // Debugf printf风格的日志
-func Debugf(format string, args ...interface{}) {
-	logger.Debugf(format, args...)
-}
-
-// Fatal 日志
-func (w *Wrapper) Fatal(args ...interface{}) {
-	w.l.Fatal(args...)
-}
-
-// Fatalf printf风格的日志
-func (w *Wrapper) Fatalf(format string, args ...interface{}) {
-	w.l.Fatalf(format, args...)
-}
-
-// Error 日志
-func (w *Wrapper) Error(args ...interface{}) {
-	w.l.Error(args...)
-}
-
-// Errorf printf风格的日志
-func (w *Wrapper) Errorf(format string, args ...interface{}) {
-	w.l.Errorf(format, args...)
-}
-
-// Warn 日志
-func (w *Wrapper) Warn(args ...interface{}) {
-	w.l.Warn(args...)
-}
-
-// Warnf printf风格的日志
-func (w *Wrapper) Warnf(format string, args ...interface{}) {
-	w.l.Warnf(format, args...)
-}
-
-func (w *Wrapper) Info(args ...interface{}) {
-	w.l.Info(args...)
-}
-
-// Infof printf风格的日志
-func (w *Wrapper) Infof(format string, args ...interface{}) {
-	w.l.Infof(format, args...)
-}
-
-// Debug 日志
-func (w *Wrapper) Debug(args ...interface{}) {
-	w.l.Debug(args...)
-}
-
-// Debugf printf风格的日志
-func (w *Wrapper) Debugf(format string, args ...interface{}) {
-	w.l.Debugf(format, args...)
+func Debugf(ctx context.Context, format string, args ...interface{}) {
+	GetLoggerWithContext(ctx).Debugf(format, args...)
 }
 
 // WithField 设置数据字典
-func WithField(fields ...interface{}) *Wrapper {
-	return &Wrapper{logger.With(fields...)}
+func WithField(ctx context.Context, fields ...interface{}) *zap.SugaredLogger {
+	return GetLoggerWithContext(ctx).WithOptions(zap.AddCallerSkip(-1)).With(fields...)
 }
 
 // GetLogKey 获取用户自定义log输出字段名，没有则使用默认的

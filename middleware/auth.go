@@ -12,19 +12,19 @@ func Auth() gin.HandlerFunc {
 	// TODO: 接入RBAC
 	return func(ctx *gin.Context) {
 		var userId string
-		tokenString := ctx.GetHeader("x-token")
+		tokenString := ctx.GetHeader("X-Token")
 		authService := service.NewAuthService(ctx)
 
 		if len(tokenString) > 0 {
 			userId, _ = authService.VerifyJwtString(tokenString)
 		}
-		ctx.Set("userId", userId)
+		ctx.Set("UserId", userId)
 
 		// 校验权限
 		path := ctx.Request.URL.Path
 		method := ctx.Request.Method
 		if isAllow := authService.IsAllow(userId, path, method); isAllow {
-			log.WithField("UserId", userId, "Path", path, "Method", method).Debugf("Passed the permission check")
+			log.WithField(ctx, "Path", path, "Method", method).Debugf("Check permission passed")
 			ctx.Next()
 		} else {
 			if len(userId) > 0 {

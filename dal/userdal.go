@@ -3,6 +3,7 @@ package dal
 import (
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"league/database"
 	"league/model"
@@ -13,9 +14,9 @@ type UserDal struct {
 }
 
 // NewUserDal 创建User数据访问层实例
-func NewUserDal() *UserDal {
+func NewUserDal(ctx *gin.Context) *UserDal {
 	return &UserDal{
-		db: database.GetInstance(),
+		db: database.GetInstance().WithContext(ctx),
 	}
 }
 

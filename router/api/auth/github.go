@@ -58,30 +58,30 @@ func CallbackGithub(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"ret": -1, "msg": "code is empty"})
 		return
 	}
-	token, err := getGithubAccessToken(code)
+	token, err := getGithubAccessToken(ctx, code)
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"ret": -1, "msg": "Get github access token failed"})
 		return
 	}
 
-	githubData, err := getGithubData(token)
+	githubData, err := getGithubData(ctx, token)
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"ret": -1, "msg": "Get github data failed"})
 		return
 	}
 
-	log.Debug("Github data: %s", githubData)
+	log.Debug(ctx, "Github data: %s", githubData)
 	data := &GithubData{}
 	err = json.Unmarshal([]byte(githubData), data)
 	if err != nil {
-		log.Errorf("Unmarshal github data failed, data: %s, err: %s", githubData, err.Error())
+		log.Errorf(ctx, "Unmarshal github data failed, data: %s, err: %s", githubData, err.Error())
 		ctx.JSON(http.StatusBadGateway, gin.H{"ret": -1, "msg": "Unmarshal github data failed"})
 		return
 	}
 
 	// 缺少必要数据
 	if data.Id == 0 {
-		log.Errorf("Get github userinfo failed, data: %s", githubData)
+		log.Errorf(ctx, "Get github userinfo failed, data: %s", githubData)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"ret": -1, "msg": fmt.Sprintf("%s:%s", data.Status, data.Message)})
 		return
 	}
@@ -104,7 +104,7 @@ func CallbackGithub(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"ret": 0, "msg": "ok", "data": id})
 }
 
-func getGithubData(accessToken string) (string, error) {
+func getGithubData(ctx *gin.Context, accessToken string) (string, error) {
 	// Get request to a set URL
 	req, err := http.NewRequest(
 		"GET",
@@ -112,7 +112,7 @@ func getGithubData(accessToken string) (string, error) {
 		nil,
 	)
 	if err != nil {
-		log.Errorf("API Request creation failed, err: %s", err.Error())
+		log.Errorf(ctx, "API Request creation failed, err: %s", err.Error())
 	}
 
 	// Set the Authorization header before sending the request
@@ -123,7 +123,7 @@ func getGithubData(accessToken string) (string, error) {
 	// Make the request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Errorf("Request failed, err: %s", err.Error())
+		log.Errorf(ctx, "Request failed, err: %s", err.Error())
 	}
 
 	// Read the response as a byte slice
@@ -133,7 +133,7 @@ func getGithubData(accessToken string) (string, error) {
 	return string(respbody), nil
 }
 
-func getGithubAccessToken(code string) (string, error) {
+func getGithubAccessToken(ctx *gin.Context, code string) (string, error) {
 
 	clientID := getConfig().ClientId
 	clientSecret := getConfig().ClientSecret
@@ -153,7 +153,7 @@ func getGithubAccessToken(code string) (string, error) {
 		bytes.NewBuffer(requestJSON),
 	)
 	if err != nil {
-		log.Errorf("Request creation failed, err: %s", err.Error())
+		log.Errorf(ctx, "Request creation failed, err: %s", err.Error())
 		return "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -162,7 +162,7 @@ func getGithubAccessToken(code string) (string, error) {
 	// Get the response
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Errorf("Request failed, err: %s", err.Error())
+		log.Errorf(ctx, "Request failed, err: %s", err.Error())
 		return "", err
 	}
 
@@ -178,7 +178,11 @@ func getGithubAccessToken(code string) (string, error) {
 
 	// Convert stringified JSON to a struct object of type githubAccessTokenResponse
 	var ghresp githubAccessTokenResponse
-	json.Unmarshal(respbody, &ghresp)
+	err = json.Unmarshal(respbody, &ghresp)
+	if err != nil {
+		log.Errorf(ctx, "Unmarshal github response failed, err: %s", err.Error())
+		return "", err
+	}
 
 	// Return the access token (as the rest of the
 	// details are relatively unnecessary for us)
