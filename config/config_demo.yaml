@@ -7,10 +7,11 @@ db:
   check_interval: 3 # Ping检测时间间隔，单位：分钟
 
 auth:
-  - source: github
-    client_id: Ov23csdx3vwmihIIN
-    client_secret: 781dc68224800827b2131ecae332130ff8a39469
-    callback_uri: "http://127.0.0.1:8080/auth/callback_github"
+  provider:
+    - source: github
+      client_id: Ov23csdx3vwmihIIN
+      client_secret: 781dc68224800827b2131ecae332130ff8a39469
+      callback_uri: "http://127.0.0.1:8080/auth/callback_github"
 
 jwt:
   sign_key: 781dc68224872827b2131e4ae332130ff8a39469

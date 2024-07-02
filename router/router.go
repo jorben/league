@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"league/router/api/auth"
+	"league/router/api"
 	"net/http"
 )
 
@@ -13,8 +13,8 @@ func SetupRouter(s *gin.Engine) {
 		ctx.JSON(http.StatusOK, gin.H{"ret": 0, "msg": "ok"})
 	})
 
-	s.GET("/auth/login_github", auth.LoginGithub)
-
-	s.GET("/auth/callback_github", auth.CallbackGithub)
+	s.GET("/auth/login", api.AuthLogin)
+	s.GET("/auth/callback", api.AuthCallback)
+	s.GET("/auth/renew", api.AuthRenew)
 
 }

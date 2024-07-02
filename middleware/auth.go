@@ -31,7 +31,7 @@ func Auth() gin.HandlerFunc {
 				ctx.JSON(http.StatusOK, gin.H{"ret": -1, "msg": "Unauthorized"})
 			} else {
 				// 未登录
-				ctx.JSON(http.StatusOK, gin.H{"ret": -1, "msg": "Login required"})
+				ctx.JSON(http.StatusOK, gin.H{"ret": -1, "msg": "GetLoginUrl required"})
 			}
 			ctx.Abort()
 

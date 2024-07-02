@@ -6,13 +6,15 @@ import (
 	"league/log"
 )
 
-type OAuthConfig struct {
+// OAuthProvider oAuth渠道配置
+type OAuthProvider struct {
 	Source       string `yaml:"source"`
 	ClientId     string `yaml:"client_id"`
 	ClientSecret string `yaml:"client_secret"`
 	CallbackUri  string `yaml:"callback_uri"`
 }
 
+// DbConfig 数据库连接配置
 type DbConfig struct {
 	Dsn             string `yaml:"dsn"`
 	MaxOpenConns    int    `yaml:"max_open_conns"`
@@ -22,10 +24,12 @@ type DbConfig struct {
 }
 
 type LeagueConfig struct {
-	Db   DbConfig           `yaml:"db"`
-	Auth []OAuthConfig      `yaml:"auth"`
-	Log  []log.OutputConfig `yaml:"log"`
-	Jwt  struct {
+	Db   DbConfig `yaml:"db"`
+	Auth struct {
+		Provider []OAuthProvider `yaml:"provider"`
+	} `yaml:"auth"`
+	Log []log.OutputConfig `yaml:"log"`
+	Jwt struct {
 		SignKey string `yaml:"sign_key"`
 	} `yaml:"jwt"`
 }
@@ -43,6 +47,16 @@ var leagueConfig *LeagueConfig
 // GetConfig 获取配置实例
 func GetConfig() *LeagueConfig {
 	return leagueConfig
+}
+
+// GetAuthProviderConfig 根据provider获取Auth配置
+func GetAuthProviderConfig(provider string) OAuthProvider {
+	for _, authConfig := range leagueConfig.Auth.Provider {
+		if authConfig.Source == provider {
+			return authConfig
+		}
+	}
+	return OAuthProvider{}
 }
 
 // LoadConfig 解析配置

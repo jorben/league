@@ -21,7 +21,7 @@ func NewUserDal(ctx *gin.Context) *UserDal {
 }
 
 // UpdateBySource 更新第三方渠道来源用户信息
-func (u *UserDal) UpdateBySource(info model.UserSocialInfo) (bool, error) {
+func (u *UserDal) UpdateBySource(info *model.UserSocialInfo) (bool, error) {
 	// 查询id
 	oldInfo := u.GetUserBySource(info.Source, info.OpenId)
 	if oldInfo == nil {
@@ -44,7 +44,7 @@ func (u *UserDal) UpdateBySource(info model.UserSocialInfo) (bool, error) {
 }
 
 // SignUpBySource 第三方渠道首次注册
-func (u *UserDal) SignUpBySource(info model.UserSocialInfo) (uint, error) {
+func (u *UserDal) SignUpBySource(info *model.UserSocialInfo) (uint, error) {
 	var id uint
 	err := u.db.Transaction(func(tx *gorm.DB) error {
 		user := &model.User{
@@ -83,7 +83,7 @@ func (u *UserDal) GetUserBySource(source string, openid string) *model.UserSocia
 		Source: source,
 		OpenId: openid,
 	}
-	result := u.db.First(data)
+	result := u.db.Where(data).First(data)
 	if result.RowsAffected == 0 {
 		return nil
 	}

@@ -3,20 +3,19 @@ package auth
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"league/config"
 	"league/log"
 	"league/model"
-	"league/service"
 	"net/http"
 	"net/url"
-	"sync"
 )
 
-var once sync.Once
-var oAuthGithubConfig config.OAuthConfig
+// ProviderGithub 渠道名称
+const ProviderGithub = "github"
 
 type GithubData struct {
 	Username string `json:"login"`
@@ -29,79 +28,63 @@ type GithubData struct {
 	Message  string `json:"message"`
 }
 
-func getConfig() *config.OAuthConfig {
-	once.Do(func() {
-		cfg := config.GetConfig()
-		for _, authConfig := range cfg.Auth {
-			if authConfig.Source == "github" {
-				oAuthGithubConfig = authConfig
-			}
-		}
-
-	})
-	return &oAuthGithubConfig
+type GithubOAuth struct {
+	cfg config.OAuthProvider
 }
 
-func LoginGithub(ctx *gin.Context) {
+// NewGithubOAuth 新建Github oAuth实例
+func NewGithubOAuth(c config.OAuthProvider) *GithubOAuth {
+	return &GithubOAuth{cfg: c}
+}
+
+func (g *GithubOAuth) GetLoginUrl(ctx *gin.Context) (string, error) {
 	// Create the dynamic redirect URL for login
-	redirectURL := fmt.Sprintf(
+	return fmt.Sprintf(
 		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s",
-		getConfig().ClientId,
-		url.QueryEscape(getConfig().CallbackUri),
-	)
-	ctx.Redirect(http.StatusFound, redirectURL)
+		g.cfg.ClientId,
+		url.QueryEscape(g.cfg.CallbackUri),
+	), nil
 }
 
-func CallbackGithub(ctx *gin.Context) {
+func (g *GithubOAuth) GetUserinfo(ctx *gin.Context) (*model.UserSocialInfo, error) {
 	code := ctx.Query("code")
 	if len(code) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"ret": -1, "msg": "code is empty"})
-		return
+		return nil, errors.New("缺少必要参数:code")
 	}
-	token, err := getGithubAccessToken(ctx, code)
+	token, err := getGithubAccessToken(ctx, g.cfg.ClientId, g.cfg.ClientSecret, code)
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"ret": -1, "msg": "Get github access token failed"})
-		return
+		return nil, errors.New("无法获取access token，请确认code是否正确")
 	}
 
 	githubData, err := getGithubData(ctx, token)
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"ret": -1, "msg": "Get github data failed"})
-		return
+		return nil, errors.New("无法获取用户信息，请确认access token是否有效")
 	}
 
-	log.Debug(ctx, "Github data: %s", githubData)
+	log.Debugf(ctx, "Github data: %s", githubData)
 	data := &GithubData{}
 	err = json.Unmarshal([]byte(githubData), data)
 	if err != nil {
 		log.Errorf(ctx, "Unmarshal github data failed, data: %s, err: %s", githubData, err.Error())
-		ctx.JSON(http.StatusBadGateway, gin.H{"ret": -1, "msg": "Unmarshal github data failed"})
-		return
+		return nil, errors.New("解析用户数据失败")
 	}
 
 	// 缺少必要数据
 	if data.Id == 0 {
 		log.Errorf(ctx, "Get github userinfo failed, data: %s", githubData)
-		ctx.JSON(http.StatusUnauthorized, gin.H{"ret": -1, "msg": fmt.Sprintf("%s:%s", data.Status, data.Message)})
-		return
+		return nil, errors.New(fmt.Sprintf("缺失必要用户数据，%s", data.Message))
 	}
 
-	authService := service.NewAuthService(ctx)
-	id, err := authService.LoginBySource(model.UserSocialInfo{
-		Source:   "Github",
+	return &model.UserSocialInfo{
+		Source:   ProviderGithub,
 		OpenId:   fmt.Sprintf("%d", data.Id),
 		Email:    data.Email,
 		Avatar:   data.Avatar,
 		Username: data.Username,
 		Nickname: data.Nickname,
 		Bio:      data.Bio,
-	})
-	if err != nil {
-		ctx.JSON(http.StatusOK, gin.H{"ret": -1, "msg": "第三方渠道登录/注册失败"})
-		return
-	}
+	}, nil
 
-	ctx.JSON(http.StatusOK, gin.H{"ret": 0, "msg": "ok", "data": id})
 }
 
 func getGithubData(ctx *gin.Context, accessToken string) (string, error) {
@@ -133,14 +116,11 @@ func getGithubData(ctx *gin.Context, accessToken string) (string, error) {
 	return string(respbody), nil
 }
 
-func getGithubAccessToken(ctx *gin.Context, code string) (string, error) {
-
-	clientID := getConfig().ClientId
-	clientSecret := getConfig().ClientSecret
+func getGithubAccessToken(ctx *gin.Context, clientId string, clientSecret string, code string) (string, error) {
 
 	// Set us the request body as JSON
 	requestBodyMap := map[string]string{
-		"client_id":     clientID,
+		"client_id":     clientId,
 		"client_secret": clientSecret,
 		"code":          code,
 	}

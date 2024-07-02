@@ -31,7 +31,7 @@ func NewAuthService(ctx *gin.Context) *AuthService {
 }
 
 // LoginBySource 从第三方登陆
-func (a *AuthService) LoginBySource(info model.UserSocialInfo) (string, error) {
+func (a *AuthService) LoginBySource(info *model.UserSocialInfo) (string, error) {
 	// 检查是否已存在该用户
 	user := a.UserDal.GetUserBySource(info.Source, info.OpenId)
 	if user == nil {
