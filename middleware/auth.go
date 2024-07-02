@@ -2,15 +2,17 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"league/common/context"
+	"league/common/errs"
 	"league/log"
 	"league/service"
-	"net/http"
 )
 
 // Auth 登录态校验
 func Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var userId string
+		c := context.CustomContext{Context: ctx}
 		tokenString := ctx.GetHeader("X-Token")
 		authService := service.NewAuthService(ctx)
 
@@ -28,13 +30,12 @@ func Auth() gin.HandlerFunc {
 		} else {
 			if len(userId) > 0 {
 				// 有登录 无权限
-				ctx.JSON(http.StatusOK, gin.H{"ret": -1, "msg": "Unauthorized"})
+				c.CJSON(errs.ErrAuthUnauthorized)
 			} else {
 				// 未登录
-				ctx.JSON(http.StatusOK, gin.H{"ret": -1, "msg": "GetLoginUrl required"})
+				c.CJSON(errs.ErrAuthNoLogin)
 			}
 			ctx.Abort()
-
 		}
 	}
 }

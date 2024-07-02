@@ -85,7 +85,7 @@ func AuthCallback(ctx *gin.Context) {
 	// 注册或更新用户信息并获取jwt token
 	token, err := authService.LoginBySource(usi)
 	if err != nil {
-		c.CJSON(errs.ErrAuthLogin)
+		c.CJSON(errs.ErrAuthLoginFailed)
 		return
 	}
 

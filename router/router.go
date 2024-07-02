@@ -2,15 +2,17 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"league/common/context"
+	"league/common/errs"
 	"league/router/api"
-	"net/http"
 )
 
 // SetupRouter 设置路由
 func SetupRouter(s *gin.Engine) {
 	// 健康检查
 	s.GET("/health", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"ret": 0, "msg": "ok"})
+		c := context.CustomContext{Context: ctx}
+		c.CJSON(errs.Success)
 	})
 
 	s.GET("/auth/login", api.AuthLogin)
