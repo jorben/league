@@ -10,6 +10,7 @@ const (
 	ErrAuthLoginFailed     = -10004 // 登录失败
 	ErrAuthNoLogin         = -10005 // 未登录
 	ErrAuthUnauthorized    = -10006 // 未授权
+	ErrAuthUnexpired       = -10007 // 未过期
 )
 
 // 定义错误码对应的错误描述
@@ -21,6 +22,7 @@ var errorMsg = map[int]string{
 	ErrAuthLoginFailed:     "登录/注册失败，请稍后重试",
 	ErrAuthNoLogin:         "未登录或登录态已过期",
 	ErrAuthUnauthorized:    "未授权或权限不足",
+	ErrAuthUnexpired:       "刷新登录态失败，当前登录态还有足够长的有效期",
 }
 
 // GetErrorMsg 获取错误码对应的错误描述

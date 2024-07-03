@@ -10,6 +10,8 @@ import (
 	"league/provider/auth"
 	"league/service"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 // AuthProvider 第三方登录渠道接口
@@ -95,5 +97,32 @@ func AuthCallback(ctx *gin.Context) {
 
 // AuthRenew 续期JWT
 func AuthRenew(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+
+	strUserId := ctx.Value("UserId").(string)
+	userId, err := strconv.Atoi(strUserId)
+	if err != nil {
+		c.CJSON(errs.ErrAuthNoLogin)
+		return
+	}
+	expiresAt, ok := ctx.Value("ExpiresAt").(int64)
+	if !ok {
+		expiresAt = 0
+	}
+
+	now := time.Now()
+	if expiresAt-now.Unix() > 1*60*60 {
+		// 距离过期时间>1小时 不予刷新
+		c.CJSON(errs.ErrAuthUnexpired)
+		return
+	}
+
+	authService := service.NewAuthService(ctx)
+	token, err := authService.SignJwtString(uint(userId))
+	if err != nil {
+		c.CJSON(errs.ErrAuthLoginFailed, "刷新token失败，请稍后重试")
+		return
+	}
+	c.CJSON(errs.Success, token)
 
 }

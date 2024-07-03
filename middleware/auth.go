@@ -12,14 +12,19 @@ import (
 func Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var userId string
+		var expiresAt int64
 		c := context.CustomContext{Context: ctx}
 		tokenString := ctx.GetHeader("X-Token")
 		authService := service.NewAuthService(ctx)
 
 		if len(tokenString) > 0 {
-			userId, _ = authService.VerifyJwtString(tokenString)
+			if token, err := authService.VerifyJwtString(tokenString); err == nil {
+				userId = token.UserId
+				expiresAt = token.ExpiresAt
+			}
 		}
 		ctx.Set("UserId", userId)
+		ctx.Set("ExpiresAt", expiresAt)
 
 		// 校验权限
 		path := ctx.Request.URL.Path

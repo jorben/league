@@ -88,7 +88,7 @@ func (a *AuthService) SignJwtString(id uint) (*AuthToken, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS384, claims)
 	sign, err := token.SignedString(a.signKey)
 	if err != nil {
-		log.Errorf(a.Ctx, "Jwt SignedString failed, err: %s", err.Error())
+		log.Infof(a.Ctx, "Jwt SignedString failed, err: %s", err.Error())
 		return nil, err
 	}
 	return &AuthToken{
@@ -100,20 +100,24 @@ func (a *AuthService) SignJwtString(id uint) (*AuthToken, error) {
 }
 
 // VerifyJwtString 校验JWT
-func (a *AuthService) VerifyJwtString(s string) (string, error) {
+func (a *AuthService) VerifyJwtString(s string) (*AuthToken, error) {
 
 	token, err := jwt.ParseWithClaims(s, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return a.signKey, nil
 	})
 	if err != nil {
 		log.Errorf(a.Ctx, "Jwt parse failed, err: %s", err.Error())
-		return "", err
+		return nil, err
 	} else if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok {
 		log.Debugf(a.Ctx, "Check login passed, UserId: %s", claims.ID)
-		return claims.ID, nil
+		return &AuthToken{
+			UserId:    claims.ID,
+			ExpiresAt: claims.ExpiresAt.Unix(),
+			NotBefore: claims.NotBefore.Unix(),
+		}, nil
 	} else {
 		log.Errorf(a.Ctx, "Unknown claims type, token: %s", s)
-		return "", errors.New("unknown claims type")
+		return nil, errors.New("unknown claims type")
 	}
 }
 
