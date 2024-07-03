@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
-import './index.css';
+import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom'
 import reportWebVitals from './reportWebVitals';
 import {mainRoutes} from "./routes"
 import Admin from "./pages/admin/Admin"
@@ -11,12 +10,11 @@ root.render(
   <React.StrictMode>
     <Router>
       <Routes>
-        {/* <Route path="/admin" element={(rProps) => { return <Admin {...rProps}/>}} /> */}
         <Route path="/admin/*" element={<Admin/>} />
         {mainRoutes.map((route, index) => {
           return <Route key={index} {...route} />;
         })}
-        
+        <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
     </Router>
   </React.StrictMode>
