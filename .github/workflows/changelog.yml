@@ -1,53 +1,38 @@
-name: changeLog
+name: Deploy
 
 on:
   push:
     tags:
-      - '*'
+      - [0-9]+.[0-9]+.[0-9]+
 
 jobs:
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/setup-node@v2-beta
-        with:
-          node-version: '12'
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Checkout Tool
+      - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
         with:
-          repository: cookpete/auto-changelog
-          path: 'auto-changelog'
-      - name: Build Tool
-        run: |
-          cd auto-changelog
-          npm install
-          npm link
+          token: ${{ github.token }}
+          tag: ${{ github.ref_name }}
 
-      - name: Generate ChangeLog
-        run: |
-          auto-changelog
-      - name: Cat ChangeLog
-        run: cat CHANGELOG.md
+#      - name: Create Release
+#        uses: ncipollo/release-action@v1.12.0
+#        with:
+#          allowUpdates: true
+#          draft: false
+#          makeLatest: true
+#          name: ${{ github.ref_name }}
+#          body: ${{ steps.changelog.outputs.changes }}
+#          token: ${{ github.token }}
 
-      - name: Commit files
-        env:
-          CI_USER: "脚本哥"
-          CI_EMAIL: "jorbenzhu@gmail.com"
-        run: |
-          git config --local user.email "$CI_EMAIL"
-          git config --local user.name "$CI_USER"
-          git add CHANGELOG.md && git commit -m 'Updated CHANGELOG.md' && echo "push=1" >> $GITHUB_ENV || echo "No changes to CHANGELOG.md"
-
-      - name: Push changes
-        if: env.push == 1
-        env:
-          CI_USER: "jorben"
-          CI_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:master
+      - name: Commit CHANGELOG.md
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: main
+          commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
+          file_pattern: CHANGELOG.md
