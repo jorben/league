@@ -90,7 +90,7 @@ func AuthCallback(ctx *gin.Context) {
 		return
 	}
 
-	c.CJSON(errs.Success, gin.H{"token": token})
+	c.CJSON(errs.Success, token)
 }
 
 // AuthRenew 续期JWT

@@ -19,6 +19,13 @@ type AuthService struct {
 	signKey   []byte
 }
 
+type AuthToken struct {
+	Token     string `json:"token"`
+	UserId    string `json:"user_id"`
+	ExpiresAt int64  `json:"expires_at"`
+	NotBefore int64  `json:"not_before"`
+}
+
 // NewAuthService 新建AuthService实例
 func NewAuthService(ctx *gin.Context) *AuthService {
 
@@ -31,7 +38,7 @@ func NewAuthService(ctx *gin.Context) *AuthService {
 }
 
 // LoginBySource 从第三方登陆
-func (a *AuthService) LoginBySource(info *model.UserSocialInfo) (string, error) {
+func (a *AuthService) LoginBySource(info *model.UserSocialInfo) (*AuthToken, error) {
 	// 检查是否已存在该用户
 	user := a.UserDal.GetUserBySource(info.Source, info.OpenId)
 	if user == nil {
@@ -39,7 +46,7 @@ func (a *AuthService) LoginBySource(info *model.UserSocialInfo) (string, error) 
 		id, err := a.UserDal.SignUpBySource(info)
 		if err != nil {
 			log.Errorf(a.Ctx, "UserDal.SignUpBySource failed, err: %s", err.Error())
-			return "", err
+			return nil, err
 		}
 		return a.SignJwtString(id)
 	} else {
@@ -47,7 +54,7 @@ func (a *AuthService) LoginBySource(info *model.UserSocialInfo) (string, error) 
 		_, err := a.UserDal.UpdateBySource(info)
 		if err != nil {
 			log.Errorf(a.Ctx, "UserDal.UpdateBySource failed, err: %s", err.Error())
-			return "", nil
+			return nil, err
 		}
 		return a.SignJwtString(user.BindUserId)
 	}
@@ -67,12 +74,14 @@ func (a *AuthService) IsAllow(userId string, path string, method string) bool {
 }
 
 // SignJwtString 签发JWT
-func (a *AuthService) SignJwtString(id uint) (string, error) {
+func (a *AuthService) SignJwtString(id uint) (*AuthToken, error) {
 	now := time.Now()
+	expiresAt := now.Add(2 * time.Hour)
+	notBefore := now.Add(-5 * time.Minute)
 	claims := jwt.RegisteredClaims{
 		Issuer:    "league",
-		ExpiresAt: jwt.NewNumericDate(now.Add(2 * time.Hour)),
-		NotBefore: jwt.NewNumericDate(now.Add(-1 * time.Minute)),
+		ExpiresAt: jwt.NewNumericDate(expiresAt),
+		NotBefore: jwt.NewNumericDate(notBefore),
 		IssuedAt:  jwt.NewNumericDate(now),
 		ID:        fmt.Sprintf("%d", id),
 	}
@@ -80,8 +89,14 @@ func (a *AuthService) SignJwtString(id uint) (string, error) {
 	sign, err := token.SignedString(a.signKey)
 	if err != nil {
 		log.Errorf(a.Ctx, "Jwt SignedString failed, err: %s", err.Error())
+		return nil, err
 	}
-	return sign, err
+	return &AuthToken{
+		Token:     sign,
+		UserId:    fmt.Sprintf("%d", id),
+		ExpiresAt: expiresAt.Unix(),
+		NotBefore: notBefore.Unix(),
+	}, nil
 }
 
 // VerifyJwtString 校验JWT
