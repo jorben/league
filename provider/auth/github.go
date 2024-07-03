@@ -36,15 +36,19 @@ func NewGithubOAuth(c config.OAuthProvider) *GithubOAuth {
 }
 
 func (g *GithubOAuth) GetLoginUrl(ctx *gin.Context) (string, error) {
-	// Create the dynamic redirect URL for login
+	cbUrl := fmt.Sprintf("%s&state=%s", g.cfg.CallbackUri, g.cfg.State)
 	return fmt.Sprintf(
 		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s",
 		g.cfg.ClientId,
-		url.QueryEscape(g.cfg.CallbackUri),
+		url.QueryEscape(cbUrl),
 	), nil
 }
 
 func (g *GithubOAuth) GetUserinfo(ctx *gin.Context) (*model.UserSocialInfo, error) {
+	state := ctx.Query("state")
+	if len(state) == 0 || state != g.cfg.State {
+		return nil, errors.New("state参数不正确")
+	}
 	code := ctx.Query("code")
 	if len(code) == 0 {
 		return nil, errors.New("缺少必要参数:code")
