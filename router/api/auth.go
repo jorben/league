@@ -126,3 +126,8 @@ func AuthRenew(ctx *gin.Context) {
 	c.CJSON(errs.Success, token)
 
 }
+
+// AuthLogout 退出登录，标记token过期
+func AuthLogout(ctx *gin.Context) {
+
+}

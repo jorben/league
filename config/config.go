@@ -41,7 +41,8 @@ var CasbinDefaultPolicies = [][]string{
 	{"anyone", "/health", "GET", "allow"},
 	{"anyone", "/auth/login*", "GET", "allow"},
 	{"anyone", "/auth/callback*", "GET", "allow"},
-	{"member", "/auth/renew*", "GET", "allow"},
+	{"member", "/auth/renew", "GET", "allow"},
+	{"member", "/auth/logout", "GET", "allow"},
 }
 
 var leagueConfig *LeagueConfig

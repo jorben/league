@@ -18,5 +18,6 @@ func SetupRouter(s *gin.Engine) {
 	s.GET("/auth/login", api.AuthLogin)
 	s.GET("/auth/callback", api.AuthCallback)
 	s.GET("/auth/renew", api.AuthRenew)
+	s.GET("/auth/logout", api.AuthLogout)
 
 }
