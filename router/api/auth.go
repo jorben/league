@@ -48,7 +48,8 @@ func AuthLogin(ctx *gin.Context) {
 		c.CJSON(errs.ErrAuthLoginUrl)
 		return
 	}
-	ctx.Redirect(http.StatusFound, url)
+	log.Debugf(ctx, "Login url: %s", url)
+	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 // AuthCallback 登录回调接口

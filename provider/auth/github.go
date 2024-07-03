@@ -24,8 +24,6 @@ type GithubData struct {
 	Nickname string `json:"name"`
 	Email    string `json:"email"`
 	Bio      string `json:"bio"`
-	Status   string `json:"status"`
-	Message  string `json:"message"`
 }
 
 type GithubOAuth struct {
@@ -58,7 +56,7 @@ func (g *GithubOAuth) GetUserinfo(ctx *gin.Context) (*model.UserSocialInfo, erro
 
 	githubData, err := getGithubData(ctx, token)
 	if err != nil {
-		return nil, errors.New("无法获取用户信息，请确认access token是否有效")
+		return nil, errors.New("获取用户信息失败，请稍后重试")
 	}
 
 	log.Debugf(ctx, "Github data: %s", githubData)
@@ -72,7 +70,7 @@ func (g *GithubOAuth) GetUserinfo(ctx *gin.Context) (*model.UserSocialInfo, erro
 	// 缺少必要数据
 	if data.Id == 0 {
 		log.Errorf(ctx, "Get github userinfo failed, data: %s", githubData)
-		return nil, errors.New(fmt.Sprintf("缺失必要用户数据，%s", data.Message))
+		return nil, errors.New("获取用户数据失败，请确认access token是否有效")
 	}
 
 	return &model.UserSocialInfo{
@@ -96,6 +94,7 @@ func getGithubData(ctx *gin.Context, accessToken string) (string, error) {
 	)
 	if err != nil {
 		log.Errorf(ctx, "API Request creation failed, err: %s", err.Error())
+		return "", err
 	}
 
 	// Set the Authorization header before sending the request
@@ -107,6 +106,7 @@ func getGithubData(ctx *gin.Context, accessToken string) (string, error) {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Errorf(ctx, "Request failed, err: %s", err.Error())
+		return "", err
 	}
 
 	// Read the response as a byte slice

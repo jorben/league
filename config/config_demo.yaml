@@ -7,6 +7,7 @@ db:
   check_interval: 3 # Ping检测时间间隔，单位：分钟
 
 auth:
+  state: 1729926124 # 随机state
   provider:
     - source: github
       client_id: Ov23csdx3vwmihIIN

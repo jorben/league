@@ -12,6 +12,7 @@ type OAuthProvider struct {
 	ClientId     string `yaml:"client_id"`
 	ClientSecret string `yaml:"client_secret"`
 	CallbackUri  string `yaml:"callback_uri"`
+	State        string `yaml:"-"`
 }
 
 // DbConfig 数据库连接配置
@@ -26,6 +27,7 @@ type DbConfig struct {
 type LeagueConfig struct {
 	Db   DbConfig `yaml:"db"`
 	Auth struct {
+		State    string          `json:"state"`
 		Provider []OAuthProvider `yaml:"provider"`
 	} `yaml:"auth"`
 	Log []log.OutputConfig `yaml:"log"`
@@ -53,6 +55,9 @@ func GetConfig() *LeagueConfig {
 func GetAuthProviderConfig(provider string) OAuthProvider {
 	for _, authConfig := range leagueConfig.Auth.Provider {
 		if authConfig.Source == provider {
+			if len(authConfig.State) == 0 {
+				authConfig.State = leagueConfig.Auth.State
+			}
 			return authConfig
 		}
 	}
