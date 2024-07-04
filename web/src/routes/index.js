@@ -1,4 +1,5 @@
 
+import App from "../pages/App";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import NotFount from "../pages/NotFount";
@@ -14,6 +15,10 @@ export const mainRoutes = [
     {
         path: "/login",
         element: <Login />,
+    },
+    {
+        path: "/app",
+        element: <App/>
     },
     {
         path: "/404",
