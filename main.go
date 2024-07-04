@@ -5,7 +5,6 @@ import (
 	"league/config"
 	"league/database"
 	"league/log"
-	"league/middleware"
 	"league/model"
 	"league/router"
 )
@@ -34,8 +33,6 @@ func main() {
 
 	// 构建Gin实例
 	s := gin.New()
-	s.Use(middleware.RequestId(), middleware.Logger(), middleware.Auth(), gin.Recovery())
-
 	// 注册路由
 	router.SetupRouter(s)
 

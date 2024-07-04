@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"league/common/context"
 	"league/common/errs"
+	"league/middleware"
 	"league/router/api"
 )
 
@@ -15,9 +16,16 @@ func SetupRouter(s *gin.Engine) {
 		c.CJSON(errs.Success)
 	})
 
-	s.GET("/auth/login", api.AuthLogin)
-	s.GET("/auth/callback", api.AuthCallback)
-	s.GET("/auth/renew", api.AuthRenew)
-	s.GET("/auth/logout", api.AuthLogout)
+	backend := s.Group("/api")
+	backend.Use(middleware.RequestId(), middleware.Logger(), middleware.Auth(), gin.Recovery())
+	backend.GET("/auth/login", api.AuthLogin)
+	backend.GET("/auth/callback", api.AuthCallback)
+	backend.GET("/auth/renew", api.AuthRenew)
+	backend.GET("/auth/logout", api.AuthLogout)
+
+	s.Static("/static", "./web/build/static")
+	s.NoRoute(func(ctx *gin.Context) {
+		ctx.File("./web/build/index.html")
+	})
 
 }
