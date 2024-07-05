@@ -10,7 +10,7 @@ const AdminHeader = ({ collapsed, setCollapsed }) => {
     } = theme.useToken();
     const items = [
         {
-          label: <a href="/auth/logout">退出登录</a>,
+          label: <a href="/login">退出登录</a>,
           key: '0',
           icon: <LogoutOutlined />
         },

@@ -1,6 +1,6 @@
 import React from 'react'
-import { Col, Layout, Row, Divider, theme, Space, Button, Flex } from 'antd';
-import {GoogleOutlined, GithubOutlined} from '@ant-design/icons'
+import { Col, Layout, Row, Divider, theme, Space, Button, QRCode, Flex } from 'antd';
+import {QqOutlined,GoogleOutlined, GithubOutlined} from '@ant-design/icons'
 import Logo from '../components/Logo';
 import AdminFooter from './admin/layout/AdminFooter';
 import BackgroundImg from '../assets/images/loginbackground2@2x.png'
@@ -26,13 +26,15 @@ function Login() {
                             <Row style={{justifyContent:"center", textAlign:"center"}}>
                                 <Flex vertical>
                                     <div><h2>微信登录</h2></div>
-                                    <div style={{border:'1px solid #eee', width:278, height:278, backgroundColor:'#f5f5f5'}}></div>
+                                    <QRCode value="https://league.yation.com/login?type=wechat" size="112" status="loading" />
+                                    <div style={{color:"#666", marginTop:"12px"}}><p>使用微信扫一扫登录</p><p>"League"</p></div>
                                 </Flex>
                             </Row>
                             <Row>
                                 <Divider style={{margin:"32px 0 24px 0"}} />
                                 <Space>
                                     <span>其他登录方式：</span>
+                                    <Button shape="circle" href='/auth/login?type=qq' icon={<QqOutlined />} />
                                     <Button shape="circle" href='/auth/login?type=google' icon={<GoogleOutlined />} />
                                     <Button shape='circle' href='/auth/login?type=github' icon={<GithubOutlined />} />
                                 </Space>

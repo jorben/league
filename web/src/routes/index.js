@@ -3,8 +3,9 @@ import App from "../pages/App";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import NotFount from "../pages/NotFount";
-import Dashboard from "../pages/admin/dashboard/Dashboard";
-import List from "../pages/admin/user/List";
+import AdminDashboard from "../pages/admin/dashboard/Dashboard";
+import AdminUserList from "../pages/admin/user/UserList";
+import { UserOutlined, HomeOutlined } from '@ant-design/icons';
 
 export const mainRoutes = [
     {
@@ -26,15 +27,39 @@ export const mainRoutes = [
     }
 ];
 
+// children with /admin
 export const adminRoutes = [
     {
         path: "/",
-        element: <Dashboard />,
+        element: <AdminDashboard />,
         exact: true,
     },
     {
         path: "/user",
-        element: <List />,
+        element: <AdminUserList />,
         exact: true
-    }
-]
+    },
+];
+
+export const adminMenus = [
+    {
+      key: '/admin',
+      icon: <HomeOutlined />,
+      label: 'Dashboard',
+    },
+    {
+      key: '2',
+      icon: <UserOutlined />,
+      label: '用户及权限',
+      children: [
+        {
+          key: '/admin/user',
+          label: '用户列表',
+        },
+        {
+          key: '/admin/user/policy',
+          label: '权限规则',
+        },
+      ],
+    },
+  ];
