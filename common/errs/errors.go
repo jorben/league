@@ -12,6 +12,8 @@ const (
 	ErrAuthUnauthorized    = -10006 // 未授权
 	ErrAuthUnexpired       = -10007 // 未过期
 	ErrMenu                = -10030 // 获取菜单失败
+
+	ErrNoRecord = -10900 // 没有匹配到预期的记录，无数据
 )
 
 // 定义错误码对应的错误描述
@@ -25,6 +27,7 @@ var errorMsg = map[int]string{
 	ErrAuthUnauthorized:    "未授权或权限不足",
 	ErrAuthUnexpired:       "刷新登录态失败，当前登录态还有足够长的有效期",
 	ErrMenu:                "获取菜单失败，请稍后重试",
+	ErrNoRecord:            "未查询到相关数据",
 }
 
 // GetErrorMsg 获取错误码对应的错误描述

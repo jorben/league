@@ -36,11 +36,17 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 	})
 
 	backend.Use(middleware.RequestId(), middleware.Logger(), middleware.Auth(), gin.Recovery())
+	// 权限相关接口
 	backend.GET("/auth/login", api.AuthLogin)
 	backend.GET("/auth/callback", api.AuthCallback)
 	backend.GET("/auth/renew", api.AuthRenew)
 	backend.GET("/auth/logout", api.AuthLogout)
+
+	// 菜单相关接口
 	backend.GET("/menu", api.GetIndexMenus)
+
+	// 用户相关接口
+	backend.GET("/user/current", api.GetUserinfo)
 
 	backendAdmin := backend.Group("/admin")
 	backendAdmin.GET("/menu", api.GetAdminMenus)

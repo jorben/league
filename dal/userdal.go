@@ -20,6 +20,25 @@ func NewUserDal(ctx *gin.Context) *UserDal {
 	}
 }
 
+// GetUserinfo 获取用户基本信息
+func (u *UserDal) GetUserinfo(where *model.User, offset int, limit int) (*model.UserList, error) {
+	var count int64
+	var list []*model.User
+	// 计算总条数
+	if err := u.db.Model(where).Where(where).Count(&count).Error; err != nil {
+		return nil, err
+	}
+	// 获取数据
+	if err := u.db.Model(where).Where(where).Offset(offset).Limit(limit).Find(&list).Error; err != nil {
+		return nil, err
+	}
+
+	return &model.UserList{
+		Count: count,
+		List:  list,
+	}, nil
+}
+
 // UpdateBySource 更新第三方渠道来源用户信息
 func (u *UserDal) UpdateBySource(info *model.UserSocialInfo) (bool, error) {
 	// 查询id
@@ -50,6 +69,7 @@ func (u *UserDal) SignUpBySource(info *model.UserSocialInfo) (uint, error) {
 		user := &model.User{
 			Nickname: info.Nickname,
 			Email:    info.Email,
+			Avatar:   info.Avatar,
 			Phone:    info.Phone,
 			Gender:   info.Gender,
 			Bio:      info.Bio,

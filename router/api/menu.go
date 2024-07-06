@@ -11,7 +11,7 @@ import (
 // GetIndexMenus 获取前台权限范围内的菜单项
 func GetIndexMenus(ctx *gin.Context) {
 	c := context.CustomContext{Context: ctx}
-	if menus, err := getMenus(ctx, model.MenuTypeIndex); err != nil {
+	if menus, err := getMenus(ctx, model.MenuTypeIndex); err == nil {
 		c.CJSON(errs.Success, menus)
 	} else {
 		c.CJSON(errs.ErrMenu)
@@ -21,7 +21,7 @@ func GetIndexMenus(ctx *gin.Context) {
 // GetAdminMenus 获取管理后台权限范围内的菜单项
 func GetAdminMenus(ctx *gin.Context) {
 	c := context.CustomContext{Context: ctx}
-	if menus, err := getMenus(ctx, model.MenuTypeAdmin); err != nil {
+	if menus, err := getMenus(ctx, model.MenuTypeAdmin); err == nil {
 		c.CJSON(errs.Success, menus)
 	} else {
 		c.CJSON(errs.ErrMenu)
