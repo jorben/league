@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"github.com/gin-gonic/gin"
 	"league/config"
 	"league/database"
@@ -8,6 +9,9 @@ import (
 	"league/model"
 	"league/router"
 )
+
+//go:embed web/build/*
+var frontend embed.FS
 
 func main() {
 	// 加载配置
@@ -34,7 +38,7 @@ func main() {
 	// 构建Gin实例
 	s := gin.New()
 	// 注册路由
-	router.SetupRouter(s)
+	router.SetupRouter(s, frontend)
 
 	// 启动服务
 	if err := s.Run(":8080"); err != nil {

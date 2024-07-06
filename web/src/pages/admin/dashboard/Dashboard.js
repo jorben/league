@@ -1,11 +1,14 @@
-import React from 'react'
+import React from "react";
+import { Space } from "antd";
+import { DashboardOutlined } from "@ant-design/icons";
 
 function Dashboard() {
   return (
-    <div>
-      <h1>Dashboard</h1>
-    </div>
-  )
+    <Space>
+      <DashboardOutlined />
+      <h3>Dashboard</h3>
+    </Space>
+  );
 }
 
-export default Dashboard
+export default Dashboard;
