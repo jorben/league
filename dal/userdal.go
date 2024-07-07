@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"league/common/util"
 	"league/database"
 	"league/model"
+	"strconv"
 )
 
 type UserDal struct {
@@ -20,23 +22,72 @@ func NewUserDal(ctx *gin.Context) *UserDal {
 	}
 }
 
-// GetUserinfo 获取用户基本信息
-func (u *UserDal) GetUserinfo(where *model.User, offset int, limit int) (*model.UserList, error) {
+// GetUserList 获取用户基本信息
+func (u *UserDal) GetUserList(where *model.User, offset int, limit int) (*model.UserList, error) {
 	var count int64
 	var list []*model.User
 	// 计算总条数
 	if err := u.db.Model(where).Where(where).Count(&count).Error; err != nil {
 		return nil, err
 	}
-	// 获取数据
-	if err := u.db.Model(where).Where(where).Offset(offset).Limit(limit).Find(&list).Error; err != nil {
-		return nil, err
+	if count > 0 {
+		// 获取数据
+		if err := u.db.Model(where).Where(where).Offset(offset).Limit(limit).Order("ID desc").Find(&list).Error; err != nil {
+			return nil, err
+		}
 	}
 
 	return &model.UserList{
 		Count: count,
 		List:  list,
 	}, nil
+}
+
+// GetUserListbySearch 用户列表查询接口
+func (u *UserDal) GetUserListbySearch(searchKey string, offset int, limit int, order []string) (*model.UserList, error) {
+	var count int64
+	var list []*model.User
+	db := u.db.Model(&model.User{})
+	if len(searchKey) > 0 {
+		// 判定searchKey
+		intKey, err := strconv.ParseUint(searchKey, 10, 64)
+		if err == nil && intKey > 0 {
+			// 通过ID查询
+			db = db.Where(&model.User{
+				Model: gorm.Model{ID: uint(intKey)},
+			})
+		} else if util.IsValidEmail(searchKey) {
+			// 通过邮箱查询
+			db = db.Where("email LIKE ?", fmt.Sprintf("%%%s%%", searchKey))
+		} else {
+			// 通过昵称查询
+			db = db.Where("nickname LIKE ?", fmt.Sprintf("%%%s%%", searchKey))
+		}
+	}
+
+	// 计算总条数
+	if err := db.Count(&count).Error; err != nil {
+		return nil, err
+	}
+
+	if count > 0 {
+		if len(order) > 0 {
+			for _, o := range order {
+				db = db.Order(o)
+			}
+		} else {
+			db.Order("ID desc")
+		}
+		if err := db.Offset(offset).Limit(limit).Find(&list).Error; err != nil {
+			return nil, err
+		}
+	}
+
+	return &model.UserList{
+		Count: count,
+		List:  list,
+	}, nil
+
 }
 
 // UpdateBySource 更新第三方渠道来源用户信息
@@ -108,4 +159,21 @@ func (u *UserDal) GetUserBySource(source string, openid string) *model.UserSocia
 		return nil
 	}
 	return data
+}
+
+// GetUserSource 批量获取用户绑定的渠道
+func (u *UserDal) GetUserSource(id []uint) (map[uint][]string, error) {
+	var result []*model.UserSocialInfo
+	if err := u.db.Model(&model.UserSocialInfo{}).Where("bind_user_id IN ?", id).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	source := make(map[uint][]string, len(result))
+	for _, info := range result {
+		if _, exists := source[info.BindUserId]; exists {
+			source[info.BindUserId] = append(source[info.BindUserId], info.Source)
+		} else {
+			source[info.BindUserId] = []string{info.Source}
+		}
+	}
+	return source, nil
 }

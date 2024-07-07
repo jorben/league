@@ -5,6 +5,7 @@ import (
 	"github.com/casbin/casbin/v2"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"league/config"
 	"league/database"
 	"league/log"
@@ -14,6 +15,7 @@ import (
 type CasbinDal struct {
 	e   *casbin.Enforcer
 	ctx *gin.Context
+	db  *gorm.DB
 }
 
 // initialRules 初始化规则，仅当规则表为空时注入默认规则
@@ -54,6 +56,7 @@ func NewCasbinDal(ctx *gin.Context) *CasbinDal {
 	return &CasbinDal{
 		e:   enforcer,
 		ctx: ctx,
+		db:  db,
 	}
 }
 
@@ -67,4 +70,30 @@ func (c *CasbinDal) IsAllow(req model.CasbinReq) bool {
 		return false
 	}
 	return true
+}
+
+// GetRules 获取规则集
+func (c *CasbinDal) GetRules(rule *model.CasbinRule) ([]*model.CasbinRule, error) {
+	var result []*model.CasbinRule
+	if err := c.db.Where(rule).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// GetUserGroup 批量获取用户的角色组
+func (c *CasbinDal) GetUserGroup(id []string, ptype string) (map[string][]string, error) {
+	var result []*model.CasbinRule
+	if err := c.db.Where("ptype = ? AND v0 IN ?", ptype, id).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	group := make(map[string][]string, len(result))
+	for _, rule := range result {
+		if _, exists := group[rule.V0]; exists {
+			group[rule.V0] = append(group[rule.V0], rule.V1)
+		} else {
+			group[rule.V0] = []string{rule.V1}
+		}
+	}
+	return group, nil
 }

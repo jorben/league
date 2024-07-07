@@ -48,8 +48,10 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 	// 用户相关接口
 	backend.GET("/user/current", api.UserCurrent)
 
+	// 管理后台相关接口
 	backendAdmin := backend.Group("/admin")
 	backendAdmin.GET("/menu", api.MenuAdmin)
+	backendAdmin.GET("/user/list", api.UserList)
 
 	s.StaticFS("/static", getFileSystem(feEmbed, "web/build/static"))
 	s.NoRoute(func(ctx *gin.Context) {

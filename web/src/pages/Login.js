@@ -23,6 +23,7 @@ import AdminFooter from "./admin/layout/AdminFooter";
 import BackgroundImg from "../assets/images/loginbackground2@2x.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import ApiClient from "../services/client";
+import CONSTAANTS from "../constants";
 
 function Login() {
   const { token } = theme.useToken();
@@ -41,7 +42,10 @@ function Login() {
             // console.log("/auth/callback", response.data);
             if (response.data?.code === 0) {
               // 存储jwt
-              localStorage.setItem("jwt", JSON.stringify(response.data?.data));
+              localStorage.setItem(
+                CONSTAANTS.STORAGE_KEY_JWT,
+                JSON.stringify(response.data?.data)
+              );
               // 跳转页面
               // TODO: 支持跳转回登录来源页面，并做同源校验
               navigate("/admin");
@@ -129,17 +133,21 @@ function Login() {
                         <span>其他登录方式：</span>
                         <Button
                           shape="circle"
-                          href="http://127.0.0.1:8080/api/auth/login?type=qq"
+                          href={CONSTAANTS.BASEURL_API + "/auth/login?type=qq"}
                           icon={<QqOutlined />}
                         />
                         <Button
                           shape="circle"
-                          href="http://127.0.0.1:8080/api/auth/login?type=google"
+                          href={
+                            CONSTAANTS.BASEURL_API + "/auth/login?type=google"
+                          }
                           icon={<GoogleOutlined />}
                         />
                         <Button
                           shape="circle"
-                          href="http://127.0.0.1:8080/api/auth/login?type=github"
+                          href={
+                            CONSTAANTS.BASEURL_API + "/auth/login?type=github"
+                          }
                           icon={<GithubOutlined />}
                         />
                       </Space>

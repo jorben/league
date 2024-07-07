@@ -1,21 +1,49 @@
 import React from "react";
-import { Col, Row, Space, Table, Badge, Tag, Drawer, Button } from "antd";
+import {
+  Col,
+  Row,
+  Space,
+  Table,
+  Badge,
+  Tag,
+  Drawer,
+  Button,
+  Avatar,
+  message,
+} from "antd";
 import Search from "antd/es/input/Search";
 import {
   UnorderedListOutlined,
   CloseOutlined,
   PicLeftOutlined,
+  GoogleOutlined,
+  GithubOutlined,
+  QqOutlined,
+  WechatOutlined,
+  QuestionCircleOutlined,
 } from "@ant-design/icons";
 import UserDetail from "./UserDetail";
+import CONSTAANTS from "../../../constants";
+import ApiClient from "../../../services/client";
+import { useNavigate } from "react-router-dom";
+import moment from "moment";
 
 const UserList = () => {
   const columns = [
     {
       title: "用户ID",
-      dataIndex: "id",
+      dataIndex: "ID",
       key: "id",
       width: 80,
       fixed: "left",
+    },
+    {
+      title: "用户头像",
+      dataIndex: "avatar",
+      key: "avatar",
+      width: 100,
+      fixed: "left",
+      render: (src) => <Avatar size="large" src={src} />,
     },
     {
       title: "用户昵称",
@@ -43,56 +71,72 @@ const UserList = () => {
       dataIndex: "source",
       key: "source",
       width: 90,
-      render: (text) => <Tag>Num: {text.length}</Tag>,
+      render: (source) => (
+        <Space>
+          {source.map((s, i) =>
+            s === "google" ? (
+              <GoogleOutlined key={i} style={{ fontSize: "24px" }} />
+            ) : s === "github" ? (
+              <GithubOutlined key={i} style={{ fontSize: "24px" }} />
+            ) : s === "qq" ? (
+              <QqOutlined key={i} style={{ fontSize: "24px" }} />
+            ) : s === "wechat" ? (
+              <WechatOutlined key={i} style={{ fontSize: "24px" }} />
+            ) : (
+              <QuestionCircleOutlined key={i} style={{ fontSize: "24px" }} />
+            )
+          )}
+        </Space>
+      ),
     },
     {
       title: "关联角色",
       dataIndex: "group",
       key: "group",
       width: 90,
-      render: (text) => <Tag>Num: {text}</Tag>,
+      render: (text) => <Tag>Num: {text?.length ? text.length + 1 : 1}</Tag>,
     },
     {
       title: "账号状态",
       dataIndex: "status",
       key: "status",
       width: 90,
-      render: (status) => <Badge status="success" text="正常" />,
+      render: (status) =>
+        status ? (
+          <Badge status="warning" text="禁用" />
+        ) : (
+          <Badge status="success" text="正常" />
+        ),
     },
     {
       title: "创建时间",
-      dataIndex: "created_at",
+      dataIndex: "CreatedAt",
       key: "created_at",
       ellipsis: true,
+      render: (t) => moment(t).format("YYYY-MM-DD HH:mm:ss"),
     },
     {
       title: "更新时间",
-      dataIndex: "updated_at",
-      key: "updated_at",
+      dataIndex: "UpdatedAt",
+      key: "pdated_at",
       ellipsis: true,
+      render: (t) => moment(t).format("YYYY-MM-DD HH:mm:ss"),
     },
   ];
 
-  const data = [];
-  for (let i = 1; i <= 80; i++) {
-    data.push({
-      key: i,
-      id: i,
-      nickname: `Edward King ${i}`,
-      email: `jorbenzhu+${i}@gmail.com`,
-      source: ["google", "github"],
-      group: 1,
-      status: 1,
-      created_at: "2024-07-03 13:08:53",
-      updated_at: "2024-07-03 13:08:53",
-    });
-  }
-
-  const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage();
+  const [openDrawer, setOpenDrawer] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
+  const [userList, setUserList] = React.useState({ Count: 0, List: [] });
+  const [searchParam, setSearchParam] = React.useState({
+    key: "",
+    page: 1,
+    size: CONSTAANTS.DEFAULT_PAGESIZE,
+  });
 
   const showLoading = () => {
-    setOpen(true);
+    setOpenDrawer(true);
     setLoading(true);
 
     // Simple loading mock. You should add cleanup logic in real world.
@@ -100,6 +144,46 @@ const UserList = () => {
       setLoading(false);
     }, 400);
   };
+
+  React.useEffect(() => {
+    const getUserList = async (searchParam) => {
+      const query = new URLSearchParams({
+        search: searchParam?.key || "",
+        page: searchParam?.page || 1,
+        size: searchParam?.size || CONSTAANTS.DEFAULT_PAGESIZE,
+      });
+      ApiClient.get(`/admin/user/list?${query.toString()}`)
+        .then((response) => {
+          // console.log(response.data);
+          if (response.data?.code === 0) {
+            setLoading(false);
+            setUserList({
+              Count: response.data?.data?.Count || 0,
+              List: response.data?.data?.List
+                ? response.data.data.List.map((item) => ({
+                    ...item,
+                    key: item.ID,
+                  }))
+                : [],
+            });
+          } else if (
+            response.data?.code === CONSTAANTS.ERRCODE.ErrAuthNoLogin ||
+            response.data?.code === CONSTAANTS.ERRCODE.ErrAuthUnauthorized
+          ) {
+            messageApi.error(response.data?.message, () => {
+              navigate("/login");
+            });
+          } else {
+            messageApi.error(response.data?.message);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          messageApi.error("请求失败，请稍后重试！");
+        });
+    };
+    getUserList(searchParam);
+  }, [messageApi, navigate, searchParam]);
 
   return (
     <>
@@ -116,7 +200,9 @@ const UserList = () => {
               <Search
                 placeholder="请输入用户id/昵称/email"
                 allowClear
-                // onSearch={onSearch}
+                onSearch={(value) => {
+                  setSearchParam({ ...searchParam, key: value });
+                }}
                 style={{
                   width: 280,
                   float: "right",
@@ -129,15 +215,19 @@ const UserList = () => {
             <Col>
               <Table
                 columns={columns}
-                dataSource={data}
+                dataSource={userList.List}
                 scroll={{
                   y: window.innerHeight - 370,
                 }}
                 pagination={{
-                  pageSize: 20,
+                  pageSize: searchParam.size,
+                  current: searchParam.page,
                   simple: true,
                   showSizeChanger: false,
                   hideOnSinglePage: true,
+                  total: userList.Count,
+                  onChange: (page, size) =>
+                    setSearchParam({ ...searchParam, page: page, size: size }),
                 }}
                 onRow={(r) => {
                   return {
@@ -161,7 +251,7 @@ const UserList = () => {
         title={<span>用户详情</span>}
         placement="right"
         size="large"
-        open={open}
+        open={openDrawer}
         loading={loading}
         closeIcon={<PicLeftOutlined />}
         extra={
@@ -169,14 +259,15 @@ const UserList = () => {
             <Button
               type="text"
               icon={<CloseOutlined />}
-              onClick={() => setOpen(false)}
+              onClick={() => setOpenDrawer(false)}
             />
           </div>
         }
-        onClose={() => setOpen(false)}
+        onClose={() => setOpenDrawer(false)}
       >
         <UserDetail />
       </Drawer>
+      {contextHolder}
     </>
   );
 };

@@ -1,18 +1,19 @@
 import axios from "axios";
+import CONSTAANTS from "../constants";
 
 const ApiClient = axios.create({
-  baseURL: "http://127.0.0.1:8080/api",
+  baseURL: CONSTAANTS.BASEURL_API,
 });
 
 ApiClient.interceptors.request.use((config) => {
   // TODO: 计算csrf token
   const csrfToken = "1234";
-  const jwt = JSON.parse(localStorage.getItem("jwt"));
+  const jwt = JSON.parse(localStorage.getItem(CONSTAANTS.STORAGE_KEY_JWT));
   if (csrfToken) {
-    config.headers["X-Csrf-Token"] = csrfToken;
+    config.headers[CONSTAANTS.HEADER_KEY_CSRF] = csrfToken;
   }
   if (jwt?.token) {
-    config.headers["X-Token"] = jwt?.token;
+    config.headers[CONSTAANTS.HEADER_KEY_JWT] = jwt?.token;
   }
   return config;
 });

@@ -17,3 +17,14 @@ type UserList struct {
 	Count int64   //总记录数
 	List  []*User // 用户信息
 }
+
+type UserWithExt struct {
+	User
+	Group  []string `json:"group"`  // 用户权限组
+	Source []string `json:"source"` // 用户绑定的登录源
+}
+
+type UserListWithExt struct {
+	Count int64
+	List  []*UserWithExt
+}

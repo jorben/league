@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useNavigate, Navigate, Route, Routes } from "react-router-dom";
 import { adminRoutes } from "../../../routes";
 import { Layout, message, Spin, theme } from "antd";
 import AdminHeader from "./AdminHeader";
@@ -7,6 +7,7 @@ import AdminFooter from "./AdminFooter";
 import AdminSider from "./AdminSider";
 import ApiClient from "../../../services/client";
 import { LoadingOutlined } from "@ant-design/icons";
+import CONSTAANTS from "../../../constants";
 
 const { Content } = Layout;
 
@@ -15,6 +16,7 @@ const AdminFrame = () => {
   const [isLoading, setLoading] = useState(true);
   const [allMenus, setAllMenus] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -27,17 +29,24 @@ const AdminFrame = () => {
           if (response.data?.code === 0) {
             setLoading(false);
             setAllMenus(response.data?.data);
+          } else if (
+            response.data?.code === CONSTAANTS.ERRCODE.ErrAuthNoLogin ||
+            response.data?.code === CONSTAANTS.ERRCODE.ErrAuthUnauthorized
+          ) {
+            messageApi.error(response.data?.message, () => {
+              navigate("/login");
+            });
           } else {
-            messageApi.error(response.data?.message);
+            messageApi.error(response.data?.message, 0);
           }
         })
         .catch((error) => {
           console.log(error);
-          messageApi.error("请求失败，请稍后重试！");
+          messageApi.error("请求失败，请稍后重试！", 0);
         });
     };
     getAdminMenus();
-  }, [messageApi]);
+  }, [messageApi, navigate]);
 
   // console.log("In AdminFrame, menus:", allMenus);
   return (

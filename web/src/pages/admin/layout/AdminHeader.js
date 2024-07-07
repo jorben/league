@@ -15,7 +15,9 @@ import {
   message,
   Skeleton,
 } from "antd";
+import { useNavigate } from "react-router-dom";
 import ApiClient from "../../../services/client";
+import CONSTAANTS from "../../../constants";
 
 const { Header } = Layout;
 
@@ -24,9 +26,18 @@ const AdminHeader = ({ collapsed, setCollapsed }) => {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  const navigate = useNavigate();
+
   const menus = (
     <Space direction="vertical">
-      <Button type="text" icon={<LogoutOutlined />} href="/login">
+      <Button
+        type="text"
+        icon={<LogoutOutlined />}
+        onClick={() => {
+          localStorage.removeItem(CONSTAANTS.STORAGE_KEY_JWT);
+          navigate("/login");
+        }}
+      >
         退出登录
       </Button>
     </Space>
