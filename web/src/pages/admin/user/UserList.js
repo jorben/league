@@ -23,7 +23,7 @@ import {
   QuestionCircleOutlined,
 } from "@ant-design/icons";
 import UserDetail from "./UserDetail";
-import CONSTAANTS from "../../../constants";
+import CONSTANTS from "../../../constants";
 import ApiClient from "../../../services/client";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
@@ -132,7 +132,7 @@ const UserList = () => {
   const [searchParam, setSearchParam] = React.useState({
     key: "",
     page: 1,
-    size: CONSTAANTS.DEFAULT_PAGESIZE,
+    size: CONSTANTS.DEFAULT_PAGESIZE,
   });
 
   const showLoading = () => {
@@ -150,7 +150,7 @@ const UserList = () => {
       const query = new URLSearchParams({
         search: searchParam?.key || "",
         page: searchParam?.page || 1,
-        size: searchParam?.size || CONSTAANTS.DEFAULT_PAGESIZE,
+        size: searchParam?.size || CONSTANTS.DEFAULT_PAGESIZE,
       });
       ApiClient.get(`/admin/user/list?${query.toString()}`)
         .then((response) => {
@@ -167,8 +167,8 @@ const UserList = () => {
                 : [],
             });
           } else if (
-            response.data?.code === CONSTAANTS.ERRCODE.ErrAuthNoLogin ||
-            response.data?.code === CONSTAANTS.ERRCODE.ErrAuthUnauthorized
+            response.data?.code === CONSTANTS.ERRCODE.ErrAuthNoLogin ||
+            response.data?.code === CONSTANTS.ERRCODE.ErrAuthUnauthorized
           ) {
             messageApi.error(response.data?.message, () => {
               navigate("/login");

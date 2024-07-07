@@ -7,7 +7,7 @@ import AdminFooter from "./AdminFooter";
 import AdminSider from "./AdminSider";
 import ApiClient from "../../../services/client";
 import { LoadingOutlined } from "@ant-design/icons";
-import CONSTAANTS from "../../../constants";
+import CONSTANTS from "../../../constants";
 
 const { Content } = Layout;
 
@@ -30,8 +30,8 @@ const AdminFrame = () => {
             setLoading(false);
             setAllMenus(response.data?.data);
           } else if (
-            response.data?.code === CONSTAANTS.ERRCODE.ErrAuthNoLogin ||
-            response.data?.code === CONSTAANTS.ERRCODE.ErrAuthUnauthorized
+            response.data?.code === CONSTANTS.ERRCODE.ErrAuthNoLogin ||
+            response.data?.code === CONSTANTS.ERRCODE.ErrAuthUnauthorized
           ) {
             messageApi.error(response.data?.message, () => {
               navigate("/login");

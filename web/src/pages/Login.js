@@ -23,7 +23,7 @@ import AdminFooter from "./admin/layout/AdminFooter";
 import BackgroundImg from "../assets/images/loginbackground2@2x.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import ApiClient from "../services/client";
-import CONSTAANTS from "../constants";
+import CONSTANTS from "../constants";
 
 function Login() {
   const { token } = theme.useToken();
@@ -43,7 +43,7 @@ function Login() {
             if (response.data?.code === 0) {
               // 存储jwt
               localStorage.setItem(
-                CONSTAANTS.STORAGE_KEY_JWT,
+                CONSTANTS.STORAGE_KEY_JWT,
                 JSON.stringify(response.data?.data)
               );
               // 跳转页面
@@ -133,20 +133,20 @@ function Login() {
                         <span>其他登录方式：</span>
                         <Button
                           shape="circle"
-                          href={CONSTAANTS.BASEURL_API + "/auth/login?type=qq"}
+                          href={CONSTANTS.BASEURL_API + "/auth/login?type=qq"}
                           icon={<QqOutlined />}
                         />
                         <Button
                           shape="circle"
                           href={
-                            CONSTAANTS.BASEURL_API + "/auth/login?type=google"
+                            CONSTANTS.BASEURL_API + "/auth/login?type=google"
                           }
                           icon={<GoogleOutlined />}
                         />
                         <Button
                           shape="circle"
                           href={
-                            CONSTAANTS.BASEURL_API + "/auth/login?type=github"
+                            CONSTANTS.BASEURL_API + "/auth/login?type=github"
                           }
                           icon={<GithubOutlined />}
                         />

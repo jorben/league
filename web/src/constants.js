@@ -1,4 +1,4 @@
-const CONSTAANTS = {
+const CONSTANTS = {
   ERRCODE: {
     ErrAuthNoLogin: -10005, //未登录
     ErrAuthUnauthorized: -10006, //未授权
@@ -10,4 +10,4 @@ const CONSTAANTS = {
   DEFAULT_PAGESIZE: 20, // 默认的pagesize
 };
 
-export default CONSTAANTS;
+export default CONSTANTS;

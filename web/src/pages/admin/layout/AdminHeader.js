@@ -17,7 +17,7 @@ import {
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import ApiClient from "../../../services/client";
-import CONSTAANTS from "../../../constants";
+import CONSTANTS from "../../../constants";
 
 const { Header } = Layout;
 
@@ -34,7 +34,7 @@ const AdminHeader = ({ collapsed, setCollapsed }) => {
         type="text"
         icon={<LogoutOutlined />}
         onClick={() => {
-          localStorage.removeItem(CONSTAANTS.STORAGE_KEY_JWT);
+          localStorage.removeItem(CONSTANTS.STORAGE_KEY_JWT);
           navigate("/login");
         }}
       >
