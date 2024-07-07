@@ -8,12 +8,12 @@ import (
 	"strconv"
 )
 
-// GetUserinfo 获取当前用户信息
-func GetUserinfo(ctx *gin.Context) {
+// UserCurrent 获取当前用户信息
+func UserCurrent(ctx *gin.Context) {
 	c := context.CustomContext{Context: ctx}
 	strId := ctx.Value("UserId").(string)
 	userId, err := strconv.ParseUint(strId, 10, 64) // 10进制
-	if err != nil {
+	if err != nil || userId == 0 {
 		c.CJSON(errs.ErrAuthNoLogin)
 		return
 	}

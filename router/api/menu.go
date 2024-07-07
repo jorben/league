@@ -8,8 +8,8 @@ import (
 	"league/service"
 )
 
-// GetIndexMenus 获取前台权限范围内的菜单项
-func GetIndexMenus(ctx *gin.Context) {
+// MenuIndex 获取前台权限范围内的菜单项
+func MenuIndex(ctx *gin.Context) {
 	c := context.CustomContext{Context: ctx}
 	if menus, err := getMenus(ctx, model.MenuTypeIndex); err == nil {
 		c.CJSON(errs.Success, menus)
@@ -18,8 +18,8 @@ func GetIndexMenus(ctx *gin.Context) {
 	}
 }
 
-// GetAdminMenus 获取管理后台权限范围内的菜单项
-func GetAdminMenus(ctx *gin.Context) {
+// MenuAdmin 获取管理后台权限范围内的菜单项
+func MenuAdmin(ctx *gin.Context) {
 	c := context.CustomContext{Context: ctx}
 	if menus, err := getMenus(ctx, model.MenuTypeAdmin); err == nil {
 		c.CJSON(errs.Success, menus)
