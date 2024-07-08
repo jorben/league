@@ -55,7 +55,7 @@ func AuthLogin(ctx *gin.Context) {
 	// 获取url or 执行跳转
 	needUrl := ctx.Query("url") != ""
 	if needUrl {
-		c.CJSON(errs.Success, "success", url)
+		c.CJSON(errs.Success, "", url)
 		return
 	}
 	ctx.Redirect(http.StatusTemporaryRedirect, url)

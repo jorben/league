@@ -219,6 +219,7 @@ const UserList = () => {
                 dataSource={userList.List}
                 loading={loading}
                 scroll={{
+                  x: "100%",
                   y: window.innerHeight - 370,
                 }}
                 pagination={{
