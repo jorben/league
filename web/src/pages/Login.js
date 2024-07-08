@@ -113,13 +113,14 @@ function Login() {
                       style={{ justifyContent: "center", textAlign: "center" }}
                     >
                       <Flex vertical>
-                        <div>
-                          <h2>微信登录</h2>
-                        </div>
-                        <QRCode
-                          value="https://league.yation.com/login?type=wechat"
-                          size="112"
-                          status="loading"
+                        <iframe
+                          style={{
+                            margin: 0,
+                            padding: 0,
+                            border: "none",
+                            height: 330,
+                          }}
+                          src="https://open.weixin.qq.com/connect/qrconnect?appid=wxe23f523def32ef41&scope=snsapi_login&redirect_uri=http%3A%2F%2Fauth.yation.com%2Flogin%3Fcallback%3D1%26type%3Dwechat&state=7724903153"
                         />
                         <div style={{ color: "#666", marginTop: "12px" }}>
                           <p>使用微信扫一扫登录</p>

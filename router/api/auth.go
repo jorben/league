@@ -27,7 +27,6 @@ func AuthLogin(ctx *gin.Context) {
 	// 获取登录方式
 	provider := ctx.Query("type")
 	providerConfig := config.OAuthProvider{}
-
 	if len(provider) > 0 {
 		providerConfig = config.GetAuthProviderConfig(provider)
 	}
@@ -38,6 +37,8 @@ func AuthLogin(ctx *gin.Context) {
 		oAuthClient = auth.NewGithubOAuth(providerConfig)
 	case auth.ProviderGoogle:
 		oAuthClient = auth.NewGoogleOAuth(providerConfig)
+	case auth.ProviderWechat:
+		oAuthClient = auth.NewWechatOAuth(providerConfig)
 	default:
 		c.CJSON(errs.ErrAuthUnknownProvider)
 		return
@@ -51,6 +52,12 @@ func AuthLogin(ctx *gin.Context) {
 		return
 	}
 	log.Debugf(ctx, "Login url: %s", url)
+	// 获取url or 执行跳转
+	needUrl := ctx.Query("url") != ""
+	if needUrl {
+		c.CJSON(errs.Success, "success", url)
+		return
+	}
 	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
 
@@ -72,6 +79,8 @@ func AuthCallback(ctx *gin.Context) {
 		oAuthClient = auth.NewGithubOAuth(providerConfig)
 	case auth.ProviderGoogle:
 		oAuthClient = auth.NewGoogleOAuth(providerConfig)
+	case auth.ProviderWechat:
+		oAuthClient = auth.NewWechatOAuth(providerConfig)
 	default:
 		c.CJSON(errs.ErrAuthUnknownProvider)
 		return

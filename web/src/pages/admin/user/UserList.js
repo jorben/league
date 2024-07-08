@@ -137,12 +137,12 @@ const UserList = () => {
 
   const showLoading = () => {
     setOpenDrawer(true);
-    setLoading(true);
+    // setLoading(true);
 
     // Simple loading mock. You should add cleanup logic in real world.
-    setTimeout(() => {
-      setLoading(false);
-    }, 400);
+    // setTimeout(() => {
+    //   setLoading(false);
+    // }, 400);
   };
 
   React.useEffect(() => {
@@ -155,8 +155,8 @@ const UserList = () => {
       ApiClient.get(`/admin/user/list?${query.toString()}`)
         .then((response) => {
           // console.log(response.data);
+          setLoading(false);
           if (response.data?.code === 0) {
-            setLoading(false);
             setUserList({
               Count: response.data?.data?.Count || 0,
               List: response.data?.data?.List
@@ -182,6 +182,7 @@ const UserList = () => {
           messageApi.error("请求失败，请稍后重试！");
         });
     };
+    setLoading(true);
     getUserList(searchParam);
   }, [messageApi, navigate, searchParam]);
 
@@ -216,6 +217,7 @@ const UserList = () => {
               <Table
                 columns={columns}
                 dataSource={userList.List}
+                loading={loading}
                 scroll={{
                   y: window.innerHeight - 370,
                 }}
