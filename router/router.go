@@ -3,6 +3,7 @@ package router
 import (
 	"embed"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"io/fs"
 	"league/common/context"
@@ -53,7 +54,7 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 	backendAdmin.GET("/menu", api.MenuAdmin)
 	backendAdmin.GET("/user/list", api.UserList)
 
-	s.StaticFS("/static", getFileSystem(feEmbed, "web/build/static"))
+	s.Use(gzip.Gzip(gzip.DefaultCompression)).StaticFS("/static", getFileSystem(feEmbed, "web/build/static"))
 	s.NoRoute(func(ctx *gin.Context) {
 		// 注意：不能使用FileFromFS的方式获取index.html，底层存在某些Bug
 		indexData, _ := feEmbed.ReadFile("web/build/index.html")

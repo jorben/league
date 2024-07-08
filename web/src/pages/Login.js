@@ -20,7 +20,11 @@ import {
 } from "@ant-design/icons";
 import Logo from "../components/Logo";
 import AdminFooter from "./admin/layout/AdminFooter";
-import BackgroundImg from "../assets/images/loginbackground2@2x.png";
+import BackgroundImg00 from "../assets/images/login_bg_00.png";
+import BackgroundImg01 from "../assets/images/login_bg_01.png";
+import BackgroundImg02 from "../assets/images/login_bg_02.png";
+import BackgroundImg03 from "../assets/images/login_bg_03.png";
+import BackgroundImg04 from "../assets/images/login_bg_04.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import ApiClient from "../services/client";
 import CONSTANTS from "../constants";
@@ -34,6 +38,18 @@ const Login = () => {
   const isCallback = searchParams.get("callback");
 
   const [messageApi, contextHolder] = message.useMessage();
+
+  const backgroundImages = [
+    BackgroundImg00,
+    BackgroundImg01,
+    BackgroundImg02,
+    BackgroundImg03,
+    BackgroundImg04,
+  ];
+
+  // 随机选择一个图片
+  const randomBGI =
+    backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
 
   useEffect(() => {
     if (isCallback) {
@@ -113,7 +129,7 @@ const Login = () => {
                 span={8}
                 style={{
                   height: 680,
-                  backgroundImage: `url(${BackgroundImg})`,
+                  backgroundImage: `url(${randomBGI})`,
                   backgroundSize: "cover",
                 }}
               ></Col>
