@@ -22,6 +22,15 @@ func NewUserDal(ctx *gin.Context) *UserDal {
 	}
 }
 
+// UpdateUser 会更新零值，无主键则创建记录
+func (u *UserDal) UpdateUser(user *model.User) (int64, error) {
+	result := u.db.Save(user)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return result.RowsAffected, nil
+}
+
 // GetUserList 获取用户基本信息
 func (u *UserDal) GetUserList(where *model.User, offset int, limit int) (*model.UserList, error) {
 	var count int64
@@ -162,17 +171,17 @@ func (u *UserDal) GetUserBySource(source string, openid string) *model.UserSocia
 }
 
 // GetUserSource 批量获取用户绑定的渠道
-func (u *UserDal) GetUserSource(id []uint) (map[uint][]string, error) {
+func (u *UserDal) GetUserSource(id []uint) (map[uint][]*model.UserSocialInfo, error) {
 	var result []*model.UserSocialInfo
 	if err := u.db.Model(&model.UserSocialInfo{}).Where("bind_user_id IN ?", id).Find(&result).Error; err != nil {
 		return nil, err
 	}
-	source := make(map[uint][]string, len(result))
+	source := make(map[uint][]*model.UserSocialInfo, len(result))
 	for _, info := range result {
 		if _, exists := source[info.BindUserId]; exists {
-			source[info.BindUserId] = append(source[info.BindUserId], info.Source)
+			source[info.BindUserId] = append(source[info.BindUserId], info)
 		} else {
-			source[info.BindUserId] = []string{info.Source}
+			source[info.BindUserId] = []*model.UserSocialInfo{info}
 		}
 	}
 	return source, nil

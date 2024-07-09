@@ -16,17 +16,13 @@ import {
   UnorderedListOutlined,
   CloseOutlined,
   PicLeftOutlined,
-  GoogleOutlined,
-  GithubOutlined,
-  QqOutlined,
-  WechatOutlined,
-  QuestionCircleOutlined,
 } from "@ant-design/icons";
 import UserDetail from "./UserDetail";
 import CONSTANTS from "../../../constants";
 import ApiClient from "../../../services/client";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+import BrandIcon from "../../../components/BrandIcon";
 
 const UserList = () => {
   const columns = [
@@ -73,19 +69,9 @@ const UserList = () => {
       width: 90,
       render: (source) => (
         <Space>
-          {source.map((s, i) =>
-            s === "google" ? (
-              <GoogleOutlined key={i} style={{ fontSize: "24px" }} />
-            ) : s === "github" ? (
-              <GithubOutlined key={i} style={{ fontSize: "24px" }} />
-            ) : s === "qq" ? (
-              <QqOutlined key={i} style={{ fontSize: "24px" }} />
-            ) : s === "wechat" ? (
-              <WechatOutlined key={i} style={{ fontSize: "24px" }} />
-            ) : (
-              <QuestionCircleOutlined key={i} style={{ fontSize: "24px" }} />
-            )
-          )}
+          {source.map((s, i) => (
+            <BrandIcon key={i} name={s?.source} size={24} />
+          ))}
         </Space>
       ),
     },
@@ -128,6 +114,7 @@ const UserList = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
+  const [showUser, setShowUser] = React.useState(null);
   const [userList, setUserList] = React.useState({ Count: 0, List: [] });
   const [searchParam, setSearchParam] = React.useState({
     key: "",
@@ -135,14 +122,9 @@ const UserList = () => {
     size: CONSTANTS.DEFAULT_PAGESIZE,
   });
 
-  const showLoading = () => {
+  const showUserDetail = (user) => {
+    setShowUser(user);
     setOpenDrawer(true);
-    // setLoading(true);
-
-    // Simple loading mock. You should add cleanup logic in real world.
-    // setTimeout(() => {
-    //   setLoading(false);
-    // }, 400);
   };
 
   React.useEffect(() => {
@@ -235,8 +217,7 @@ const UserList = () => {
                 onRow={(r) => {
                   return {
                     onClick: (e) => {
-                      showLoading();
-                      // console.log(e);
+                      showUserDetail(r);
                     },
                     style: {
                       cursor: "pointer",
@@ -268,7 +249,7 @@ const UserList = () => {
         }
         onClose={() => setOpenDrawer(false)}
       >
-        <UserDetail />
+        <UserDetail user={showUser} />
       </Drawer>
       {contextHolder}
     </>

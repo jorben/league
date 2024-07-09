@@ -8,6 +8,13 @@ const CONSTANTS = {
   HEADER_KEY_JWT: "X-Token", // jwt header key
   HEADER_KEY_CSRF: "X-Csrf-Token",
   DEFAULT_PAGESIZE: 20, // 默认的pagesize
+  USER_PROVIDER: {
+    // 用户来源渠道
+    WECHAT: "wechat",
+    QQ: "qq",
+    GOOGLE: "google",
+    GITHUB: "github",
+  },
 };
 
 export default CONSTANTS;

@@ -19,12 +19,53 @@ func UserCurrent(ctx *gin.Context) {
 		return
 	}
 	userService := service.NewUserService(ctx)
-	user := userService.GetUserInfo(uint(userId))
-	if user == nil {
+	if user, err := userService.GetUserInfo(uint(userId)); err != nil {
+		c.CJSON(errs.ErrDbSelect)
+	} else if user == nil {
 		c.CJSON(errs.ErrNoRecord, "没有用户信息")
+	} else {
+		c.CJSON(errs.Success, user)
+	}
+}
+
+// UserDetail 获取用户详细信息
+func UserDetail(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	id := ctx.Query("id")
+	if len(id) == 0 {
+		c.CJSON(errs.ErrParam, "用户ID")
 		return
 	}
-	c.CJSON(errs.Success, user)
+	userService := service.NewUserService(ctx)
+	userDetail, err := userService.GetUserList(id, 0, 1, []string{})
+	if err != nil {
+		c.CJSON(errs.ErrDbSelect, "用户详情")
+	} else if userDetail.Count == 0 {
+		c.CJSON(errs.ErrNoRecord, "用户详情")
+	} else {
+		c.CJSON(errs.Success, userDetail.List[0])
+	}
+}
+
+// UpdateUserStatus 更新用户状态
+func UpdateUserStatus(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	type idStatus struct {
+		Id     uint  `json:"id"`
+		Status uint8 `json:"status"`
+	}
+	param := &idStatus{}
+	if err := ctx.ShouldBindBodyWithJSON(param); err != nil {
+		c.CJSON(errs.ErrParam, "用户id或状态值不符合要求")
+		return
+	}
+	userService := service.NewUserService(ctx)
+	if _, err := userService.UpdateUserStatus(param.Id, param.Status); err != nil {
+		c.CJSON(errs.ErrDbUpdate, err.Error())
+		return
+	}
+	c.CJSON(errs.Success)
+
 }
 
 // UserList 获取用户列表

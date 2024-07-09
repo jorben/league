@@ -11,6 +11,7 @@ import {
   Flex,
   Spin,
   message,
+  Carousel,
 } from "antd";
 import {
   QqOutlined,
@@ -38,18 +39,6 @@ const Login = () => {
   const isCallback = searchParams.get("callback");
 
   const [messageApi, contextHolder] = message.useMessage();
-
-  const backgroundImages = [
-    BackgroundImg00,
-    BackgroundImg01,
-    BackgroundImg02,
-    BackgroundImg03,
-    BackgroundImg04,
-  ];
-
-  // 随机选择一个图片
-  const randomBGI =
-    backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
 
   useEffect(() => {
     if (isCallback) {
@@ -125,14 +114,21 @@ const Login = () => {
             }}
           >
             <Row>
-              <Col
-                span={8}
-                style={{
-                  height: 680,
-                  backgroundImage: `url(${randomBGI})`,
-                  backgroundSize: "cover",
-                }}
-              ></Col>
+              <Col span={8}>
+                <Carousel
+                  autoplay={true}
+                  dots={false}
+                  fade={true}
+                  speed={2000}
+                  autoplaySpeed={10000}
+                >
+                  <img src={BackgroundImg00} alt="" width="400" />
+                  <img src={BackgroundImg01} alt="" width="400" />
+                  <img src={BackgroundImg02} alt="" width="400" />
+                  <img src={BackgroundImg03} alt="" width="400" />
+                  <img src={BackgroundImg04} alt="" width="400" />
+                </Carousel>
+              </Col>
               <Col span={16}>
                 <Row style={{ padding: "12px", justifyContent: "center" }}>
                   <Logo collapsed={false} theme="light" />

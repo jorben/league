@@ -25,11 +25,11 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 	backend := s.Group("/api")
 	// TODO: 移除跨域支持
 	backend.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "PATCH"},
-		AllowHeaders: []string{"Origin", "X-Token", "X-Csrf-Token", "X-Request-Id"},
-		//AllowCredentials: true,
-		MaxAge: 12 * time.Hour,
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "HEAD", "PATCH"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "X-Token", "X-Csrf-Token", "X-Request-Id"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}))
 	backend.OPTIONS("/*any", func(ctx *gin.Context) {
 		// 处理OPTIONS请求，例如返回204 No Content
@@ -53,6 +53,8 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 	backendAdmin := backend.Group("/admin")
 	backendAdmin.GET("/menu", api.MenuAdmin)
 	backendAdmin.GET("/user/list", api.UserList)
+	backendAdmin.GET("/user/detail", api.UserDetail)
+	backendAdmin.POST("/user/status", api.UpdateUserStatus)
 
 	s.Use(gzip.Gzip(gzip.DefaultCompression)).StaticFS("/static", getFileSystem(feEmbed, "web/build/static"))
 	s.NoRoute(func(ctx *gin.Context) {

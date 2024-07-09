@@ -9,55 +9,130 @@ import {
   Button,
   Row,
   Col,
+  message,
 } from "antd";
-import {
-  GoogleOutlined,
-  QuestionCircleOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { QuestionCircleOutlined, DeleteOutlined } from "@ant-design/icons";
 import React from "react";
 import UserDetailGroup from "./UserDetailGroup";
+import CONSTANTS from "../../../constants";
+import ApiClient from "../../../services/client";
+import BrandIcon from "../../../components/BrandIcon";
+import moment from "moment";
+import { useNavigate } from "react-router-dom";
 
-const UserDetail = () => {
-  const baseDetail = [
+const UserDetail = ({ user }) => {
+  const [messageApi, contextHolder] = message.useMessage();
+  const [reload, setReload] = React.useState(false);
+  const [userDetail, setUserDetail] = React.useState({
+    base: [],
+    group: [],
+    source: [],
+  });
+  const navigate = useNavigate();
+  const formatBaseInfo = (userDetail) => [
     {
       key: "id",
       label: "用户ID",
-      children: "1234",
+      children: userDetail?.ID,
     },
     {
       key: "nickname",
       label: "用户昵称",
-      children: "脚本大哥",
+      children: userDetail?.nickname,
     },
     {
       key: "email",
       label: "邮箱",
-      children: "jorbenzhu@gmail.com",
+      children: userDetail?.email,
     },
     {
       key: "phone",
       label: "手机",
-      children: "",
+      children: userDetail?.phone,
     },
     {
       key: "bio",
       label: "简介",
-      children:
-        "这里是个人简介，很长的简介，看看超长的效果如何。这里是个人简介，很长的简介，看看超长的效果如何。这里是个人简介，很长的简介，看看超长的效果如何。",
+      children: userDetail?.bio,
       span: 2,
     },
     {
       key: "created_at",
       label: "创建时间",
-      children: "2024-07-03 13:08:53",
+      children: moment(userDetail?.CreatedAt).format("YYYY-MM-DD HH:mm:ss"),
     },
     {
       key: "updated_at",
       label: "更新时间",
-      children: "2024-07-03 13:08:53",
+      children: moment(userDetail?.UpdatedAt).format("YYYY-MM-DD HH:mm:ss"),
     },
   ];
+
+  const updateStatus = (status) => {
+    const data = { id: userDetail?.ID, status: status };
+    ApiClient.post("/admin/user/status", data)
+      .then((response) => {
+        if (response.data?.code === 0) {
+          setUserDetail({ ...userDetail, status: status });
+          messageApi.success("状态更新成功");
+        } else {
+          messageApi.error(response.data?.message);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        messageApi.error("请求失败，请稍后重试！");
+      });
+  };
+
+  React.useEffect(() => {
+    const getUserDetail = async (id) => {
+      if (!id) {
+        messageApi.error("缺少用户ID，请刷新后重试");
+      } else {
+        ApiClient.get(`admin/user/detail?id=${id}`)
+          .then((response) => {
+            // console.log(response.data);
+            if (response.data?.code === 0) {
+              setUserDetail({
+                ...response.data?.data,
+                base: formatBaseInfo(response.data?.data),
+                source: response.data?.data?.source.map((s, i) => ({
+                  ...s,
+                  key: i,
+                })),
+              });
+            } else if (
+              response.data?.code === CONSTANTS.ERRCODE.ErrAuthNoLogin ||
+              response.data?.code === CONSTANTS.ERRCODE.ErrAuthUnauthorized
+            ) {
+              messageApi.error(response.data?.message, () => {
+                navigate(
+                  `/login?redirect=${encodeURIComponent(window.location.href)}`
+                );
+              });
+            } else {
+              messageApi.error(response.data?.message);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            messageApi.error("请求失败，请稍后重试！");
+          });
+      }
+      setReload(false);
+    };
+    if (!reload) {
+      // 首次加载，从上游组件获取信息
+      setUserDetail({
+        ...user,
+        base: formatBaseInfo(user),
+        source: user?.source.map((s, i) => ({ ...s, key: i })),
+      });
+    } else {
+      getUserDetail(user?.ID);
+    }
+  }, [user, reload, messageApi, navigate]);
 
   const sourceColumns = [
     {
@@ -73,7 +148,7 @@ const UserDetail = () => {
           },
         };
       },
-      render: (source) => <GoogleOutlined />,
+      render: (source) => <BrandIcon name={source} size={30} />,
     },
     {
       title: "头像昵称",
@@ -99,29 +174,27 @@ const UserDetail = () => {
       title: "OpenId",
       dataIndex: "open_id",
       key: "open_id",
-      // width: 200,
       ellipsis: true,
     },
     {
       title: "邮箱",
       dataIndex: "email",
       key: "email",
-      // width: 200,
       ellipsis: true,
     },
     {
       title: "创建时间",
-      dataIndex: "created_at",
+      dataIndex: "CreatedAt",
       key: "created_at",
-      // width: 200,
       ellipsis: true,
+      render: (t) => moment(t).format("YYYY-MM-DD HH:mm:ss"),
     },
     {
       title: "更新时间",
-      dataIndex: "updated_at",
+      dataIndex: "UpdatedAt",
       key: "updated_at",
-      // width: 200,
       ellipsis: true,
+      render: (t) => moment(t).format("YYYY-MM-DD HH:mm:ss"),
     },
     {
       title: "操作",
@@ -133,19 +206,6 @@ const UserDetail = () => {
     },
   ];
 
-  const sourceData = [];
-  for (let i = 1; i <= 3; i++) {
-    sourceData.push({
-      key: i,
-      source: "google",
-      email: `jorbenzhu+${i}@gmail.com`,
-      avatar: "https://avatars.githubusercontent.com/u/2806170?v=4",
-      open_id: "101146533148280428613",
-      nickname: "渠道昵称",
-      created_at: "2024-07-03 13:08:53",
-      updated_at: "2024-07-03 13:08:53",
-    });
-  }
   return (
     <Space direction="vertical">
       <Descriptions
@@ -156,12 +216,12 @@ const UserDetail = () => {
         }
         column={2}
         bordered
-        items={baseDetail}
+        items={userDetail?.base}
       />
       <Divider orientation="left">登录来源</Divider>
       <Table
         columns={sourceColumns}
-        dataSource={sourceData}
+        dataSource={userDetail?.source}
         pagination={false}
         bordered
         scroll={{
@@ -169,13 +229,20 @@ const UserDetail = () => {
         }}
       />
       <Divider orientation="left">关联角色</Divider>
-      <UserDetailGroup />
+      <UserDetailGroup group={userDetail?.group} />
       <Divider orientation="left">账户状态</Divider>
       <Row>
         <Col span={12}>
           <Space>
             <span>禁用用户：</span>
-            <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+            <Switch
+              checked={userDetail?.status === 1}
+              checkedChildren="开启"
+              unCheckedChildren="关闭"
+              onChange={(checked) => {
+                updateStatus(checked ? 1 : 0);
+              }}
+            />
             <Tooltip title="开启后用户将无法登录">
               <QuestionCircleOutlined />
             </Tooltip>
@@ -187,6 +254,7 @@ const UserDetail = () => {
           </Button>
         </Col>
       </Row>
+      {contextHolder}
     </Space>
   );
 };

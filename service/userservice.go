@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"league/dal"
@@ -24,20 +25,41 @@ func NewUserService(ctx *gin.Context) *UserService {
 	}
 }
 
+func (u *UserService) UpdateUserStatus(id uint, status uint8) (bool, error) {
+	user, err := u.GetUserInfo(id)
+	if err != nil {
+		return false, err
+	}
+	if user == nil {
+		return false, errors.New("user not found")
+	}
+	if user.Status == status {
+		log.Debug(u.Ctx, "Current status is equal to target status")
+		return true, nil
+	}
+	user.Status = status
+	_, err = u.UserDal.UpdateUser(user)
+	if err != nil {
+		log.Errorf(u.Ctx, "Update user failed, err: %s", err.Error())
+		return false, err
+	}
+	return true, nil
+}
+
 // GetUserInfo 根据用户ID获取用户基本信息
-func (u *UserService) GetUserInfo(id uint) *model.User {
+func (u *UserService) GetUserInfo(id uint) (*model.User, error) {
 	user := &model.User{
 		Model: gorm.Model{ID: id},
 	}
 	result, err := u.UserDal.GetUserList(user, 0, 1)
 	if err != nil {
 		log.Errorf(u.Ctx, "Get userinfo failed, err: %s", err.Error())
-		return nil
+		return nil, err
 	}
 	if result == nil || result.Count == 0 || len(result.List) == 0 {
-		return nil
+		return nil, nil
 	}
-	return result.List[0]
+	return result.List[0], nil
 }
 
 // GetUserList 查询用户列表
@@ -73,7 +95,7 @@ func (u *UserService) GetUserList(search string, offset int, limit int, order []
 			log.Errorf(u.Ctx, "Get user source list failed, err: %s", err.Error())
 			return nil, err
 		}
-		log.Debugf(u.Ctx, "user source: %v", source)
+		//log.Debugf(u.Ctx, "user source: %v", source)
 
 		for _, user := range result.List {
 			userExt := &model.UserWithExt{
