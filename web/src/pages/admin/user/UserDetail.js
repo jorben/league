@@ -11,7 +11,11 @@ import {
   Col,
   message,
 } from "antd";
-import { QuestionCircleOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  QuestionCircleOutlined,
+  DeleteOutlined,
+  DisconnectOutlined,
+} from "@ant-design/icons";
 import React from "react";
 import UserDetailGroup from "./UserDetailGroup";
 import CONSTANTS from "../../../constants";
@@ -37,8 +41,13 @@ const UserDetail = ({ user }) => {
     },
     {
       key: "nickname",
-      label: "用户昵称",
-      children: userDetail?.nickname,
+      label: "头像昵称",
+      children: (
+        <Space>
+          <Avatar src={userDetail?.avatar} size="large" />
+          <span>{userDetail?.nickname}</span>
+        </Space>
+      ),
     },
     {
       key: "email",
@@ -68,6 +77,23 @@ const UserDetail = ({ user }) => {
     },
   ];
 
+  const unbindSource = (source) => {
+    const data = { id: userDetail?.ID, source: source };
+    ApiClient.post("/admin/user/source", data)
+      .then((response) => {
+        if (response.data?.code === 0) {
+          setReload(true);
+          messageApi.success("解绑成功");
+        } else {
+          messageApi.error(response.data?.message);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        messageApi.error("请求失败，请稍后重试！");
+      });
+  };
+
   const updateStatus = (status) => {
     const data = { id: userDetail?.ID, status: status };
     ApiClient.post("/admin/user/status", data)
@@ -85,6 +111,16 @@ const UserDetail = ({ user }) => {
       });
   };
 
+  const formatUserDetail = React.useCallback((user) => {
+    return {
+      ...user,
+      base: formatBaseInfo(user),
+      source: user?.source
+        ? user?.source.map((s, i) => ({ ...s, key: i }))
+        : [],
+    };
+  }, []);
+
   React.useEffect(() => {
     const getUserDetail = async (id) => {
       if (!id) {
@@ -94,14 +130,7 @@ const UserDetail = ({ user }) => {
           .then((response) => {
             // console.log(response.data);
             if (response.data?.code === 0) {
-              setUserDetail({
-                ...response.data?.data,
-                base: formatBaseInfo(response.data?.data),
-                source: response.data?.data?.source.map((s, i) => ({
-                  ...s,
-                  key: i,
-                })),
-              });
+              setUserDetail(formatUserDetail(response.data?.data));
             } else if (
               response.data?.code === CONSTANTS.ERRCODE.ErrAuthNoLogin ||
               response.data?.code === CONSTANTS.ERRCODE.ErrAuthUnauthorized
@@ -124,15 +153,11 @@ const UserDetail = ({ user }) => {
     };
     if (!reload) {
       // 首次加载，从上游组件获取信息
-      setUserDetail({
-        ...user,
-        base: formatBaseInfo(user),
-        source: user?.source.map((s, i) => ({ ...s, key: i })),
-      });
+      setUserDetail(formatUserDetail(user));
     } else {
       getUserDetail(user?.ID);
     }
-  }, [user, reload, messageApi, navigate]);
+  }, [user, reload, messageApi, navigate, formatUserDetail]);
 
   const sourceColumns = [
     {
@@ -165,8 +190,8 @@ const UserDetail = ({ user }) => {
       },
       render: (_, record) => (
         <Space direction="vertical">
-          <Avatar size="large" src={record.avatar} />
-          <span>{record.nickname}</span>
+          <Avatar size="large" src={record?.avatar} />
+          <span>{record?.nickname}</span>
         </Space>
       ),
     },
@@ -187,22 +212,33 @@ const UserDetail = ({ user }) => {
       dataIndex: "CreatedAt",
       key: "created_at",
       ellipsis: true,
-      render: (t) => moment(t).format("YYYY-MM-DD HH:mm:ss"),
+      render: (t) => (t ? moment(t).format("YYYY-MM-DD HH:mm:ss") : "-"),
     },
     {
       title: "更新时间",
       dataIndex: "UpdatedAt",
       key: "updated_at",
       ellipsis: true,
-      render: (t) => moment(t).format("YYYY-MM-DD HH:mm:ss"),
+      render: (t) => (t ? moment(t).format("YYYY-MM-DD HH:mm:ss") : "-"),
     },
     {
       title: "操作",
       dataIndex: "action",
       key: "action",
-      width: 90,
+      width: 110,
       fixed: "right",
-      render: (text) => <a href="/#">解绑</a>,
+      render: (_, record) => (
+        <Button
+          type="text"
+          onClick={() => {
+            unbindSource(record?.source);
+          }}
+          icon={<DisconnectOutlined />}
+          danger
+        >
+          解绑
+        </Button>
+      ),
     },
   ];
 

@@ -69,9 +69,10 @@ const UserList = () => {
       width: 90,
       render: (source) => (
         <Space>
-          {source.map((s, i) => (
-            <BrandIcon key={i} name={s?.source} size={24} />
-          ))}
+          {source &&
+            source.map((s, i) => (
+              <BrandIcon key={i} name={s?.source} size={24} />
+            ))}
         </Space>
       ),
     },
@@ -243,11 +244,17 @@ const UserList = () => {
             <Button
               type="text"
               icon={<CloseOutlined />}
-              onClick={() => setOpenDrawer(false)}
+              onClick={() => {
+                setOpenDrawer(false);
+                setSearchParam({ ...searchParam });
+              }}
             />
           </div>
         }
-        onClose={() => setOpenDrawer(false)}
+        onClose={() => {
+          setOpenDrawer(false);
+          setSearchParam({ ...searchParam });
+        }}
       >
         <UserDetail user={showUser} />
       </Drawer>

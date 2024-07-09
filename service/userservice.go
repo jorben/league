@@ -25,6 +25,21 @@ func NewUserService(ctx *gin.Context) *UserService {
 	}
 }
 
+// UnbindUserSource 解绑用户登录渠道
+func (u *UserService) UnbindUserSource(id uint, source string) (bool, error) {
+	info := &model.UserSocialInfo{
+		BindUserId: id,
+		Source:     source,
+	}
+	result, err := u.UserDal.DeleteUserSource(info)
+	if err != nil {
+		log.Errorf(u.Ctx, "Delete user source failed, err: %s", err.Error())
+		return false, err
+	}
+	return result, nil
+}
+
+// UpdateUserStatus 更新用户状态
 func (u *UserService) UpdateUserStatus(id uint, status uint8) (bool, error) {
 	user, err := u.GetUserInfo(id)
 	if err != nil {

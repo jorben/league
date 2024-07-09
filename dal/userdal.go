@@ -9,6 +9,7 @@ import (
 	"league/database"
 	"league/model"
 	"strconv"
+	"time"
 )
 
 type UserDal struct {
@@ -29,6 +30,28 @@ func (u *UserDal) UpdateUser(user *model.User) (int64, error) {
 		return 0, result.Error
 	}
 	return result.RowsAffected, nil
+}
+
+// DeleteUserSource 删除用户登录渠道
+func (u *UserDal) DeleteUserSource(info *model.UserSocialInfo) (bool, error) {
+	now := time.Now()
+
+	err := u.db.Transaction(func(tx *gorm.DB) error {
+		// 更新openid，增加删除时间戳，避免软删除后唯一索引冲突
+		if err := tx.Model(info).Where("source = ? AND bind_user_id = ?", info.Source, info.BindUserId).
+			UpdateColumn("open_id", gorm.Expr("CONCAT(open_id, '-', ?)", now)).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("source = ? AND bind_user_id = ?", info.Source, info.BindUserId).
+			Delete(&model.UserSocialInfo{}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // GetUserList 获取用户基本信息

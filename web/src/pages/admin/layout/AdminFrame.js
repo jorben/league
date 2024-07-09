@@ -37,12 +37,12 @@ const AdminFrame = () => {
               navigate("/login");
             });
           } else {
-            messageApi.error(response.data?.message, 0);
+            messageApi.error(response.data?.message);
           }
         })
         .catch((error) => {
           console.log(error);
-          messageApi.error("请求失败，请稍后重试！", 0);
+          messageApi.error("请求失败，请稍后重试！");
         });
     };
     getAdminMenus();

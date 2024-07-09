@@ -47,14 +47,35 @@ func UserDetail(ctx *gin.Context) {
 	}
 }
 
-// UpdateUserStatus 更新用户状态
-func UpdateUserStatus(ctx *gin.Context) {
+// UserUnbind 解绑社交登录渠道
+func UserUnbind(ctx *gin.Context) {
 	c := context.CustomContext{Context: ctx}
-	type idStatus struct {
+	type request struct {
+		Id     uint   `json:"id"`
+		Source string `json:"source"`
+	}
+	param := &request{}
+	if err := ctx.ShouldBindBodyWithJSON(param); err != nil {
+		c.CJSON(errs.ErrParam, "用户id或渠道不符合要求")
+		return
+	}
+	userService := service.NewUserService(ctx)
+	if _, err := userService.UnbindUserSource(param.Id, param.Source); err != nil {
+		c.CJSON(errs.ErrDbUpdate, err.Error())
+		return
+	}
+	c.CJSON(errs.Success)
+
+}
+
+// UserStatus 更新用户状态
+func UserStatus(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	type request struct {
 		Id     uint  `json:"id"`
 		Status uint8 `json:"status"`
 	}
-	param := &idStatus{}
+	param := &request{}
 	if err := ctx.ShouldBindBodyWithJSON(param); err != nil {
 		c.CJSON(errs.ErrParam, "用户id或状态值不符合要求")
 		return

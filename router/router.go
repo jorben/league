@@ -36,7 +36,7 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 		ctx.AbortWithStatus(http.StatusNoContent)
 	})
 
-	backend.Use(middleware.RequestId(), middleware.Logger(), middleware.Auth(), gin.Recovery())
+	backend.Use(gin.Recovery(), middleware.RequestId(), middleware.Logger(), middleware.Auth())
 	// 权限相关接口
 	backend.GET("/auth/login", api.AuthLogin)
 	backend.GET("/auth/callback", api.AuthCallback)
@@ -54,7 +54,8 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 	backendAdmin.GET("/menu", api.MenuAdmin)
 	backendAdmin.GET("/user/list", api.UserList)
 	backendAdmin.GET("/user/detail", api.UserDetail)
-	backendAdmin.POST("/user/status", api.UpdateUserStatus)
+	backendAdmin.POST("/user/status", api.UserStatus)
+	backendAdmin.POST("/user/source", api.UserUnbind)
 
 	s.Use(gzip.Gzip(gzip.DefaultCompression)).StaticFS("/static", getFileSystem(feEmbed, "web/build/static"))
 	s.NoRoute(func(ctx *gin.Context) {
