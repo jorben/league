@@ -38,12 +38,12 @@ func NewWechatOAuth(c config.OAuthProvider) *WechatOAuth {
 }
 
 // GetLoginUrl 获取登录URL
-func (g *WechatOAuth) GetLoginUrl(ctx *gin.Context) (string, error) {
+func (g *WechatOAuth) GetLoginUrl(ctx *gin.Context, redirect string) (string, error) {
 
 	return fmt.Sprintf(
 		"https://open.weixin.qq.com/connect/qrconnect?appid=%s&scope=snsapi_login&redirect_uri=%s&state=%s",
 		g.cfg.ClientId,
-		url.QueryEscape(g.cfg.CallbackUri),
+		url.QueryEscape(fmt.Sprintf("%s&redirect_uri=%s", g.cfg.CallbackUri, url.QueryEscape(redirect))),
 		g.cfg.State,
 	), nil
 }

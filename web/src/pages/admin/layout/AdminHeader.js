@@ -35,7 +35,11 @@ const AdminHeader = ({ collapsed, setCollapsed }) => {
         icon={<LogoutOutlined />}
         onClick={() => {
           localStorage.removeItem(CONSTANTS.STORAGE_KEY_JWT);
-          navigate("/login");
+          navigate(
+            `/login?redirect_uri=${encodeURIComponent(
+              window.location.pathname
+            )}`
+          );
         }}
       >
         退出登录

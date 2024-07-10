@@ -35,10 +35,26 @@ const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [wxLoginUrl, setWxLoginUrl] = useState("");
-  const searchParams = new URLSearchParams(location.search);
+  const searchParams = React.useMemo(() => {
+    return new URLSearchParams(location.search);
+  }, [location]);
   const isCallback = searchParams.get("callback");
 
   const [messageApi, contextHolder] = message.useMessage();
+  const getRedirect = React.useCallback(() => {
+    try {
+      const r = searchParams.get("redirect_uri") || "/";
+      // 尝试将输入解析为URL对象
+      const parsedUrl = new URL(r, "http://dummybase");
+      // 获取路径和查询字符串
+      const pathAndQuery = parsedUrl.pathname + parsedUrl.search;
+      // 如果路径和查询字符串是根路径（即"/"），则返回空字符串
+      return pathAndQuery;
+    } catch (e) {
+      // 如果输入不是有效的URL（例如相对路径），直接返回输入
+      return "/";
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isCallback) {
@@ -55,7 +71,7 @@ const Login = () => {
               );
               // 跳转页面
               // TODO: 支持跳转回登录来源页面，并做同源校验
-              navigate("/admin");
+              navigate(getRedirect());
             } else {
               messageApi.error(response.data?.message);
             }
@@ -69,7 +85,10 @@ const Login = () => {
     } else {
       // 登录场景，获取微信地址
       const getWxLoginUrl = async () => {
-        ApiClient.get("/auth/login?type=wechat&url=1")
+        ApiClient.get(
+          "/auth/login?type=wechat&url=1&redirect_uri=" +
+            encodeURIComponent(getRedirect())
+        )
           .then((response) => {
             if (response.data?.code === 0) {
               setWxLoginUrl(response.data?.data);
@@ -84,7 +103,7 @@ const Login = () => {
       };
       getWxLoginUrl();
     }
-  }, [messageApi, isCallback, navigate, location]);
+  }, [messageApi, isCallback, navigate, location, getRedirect]);
 
   return (
     <Layout
@@ -187,7 +206,11 @@ const Login = () => {
                         <span>其他登录方式：</span>
                         <Button
                           shape="round"
-                          href={CONSTANTS.BASEURL_API + "/auth/login?type=qq"}
+                          href={
+                            CONSTANTS.BASEURL_API +
+                            "/auth/login?type=qq&redirect_uri=" +
+                            encodeURIComponent(getRedirect())
+                          }
                           icon={<QqOutlined />}
                         >
                           QQ
@@ -195,7 +218,9 @@ const Login = () => {
                         <Button
                           shape="round"
                           href={
-                            CONSTANTS.BASEURL_API + "/auth/login?type=google"
+                            CONSTANTS.BASEURL_API +
+                            "/auth/login?type=google&redirect_uri=" +
+                            encodeURIComponent(getRedirect())
                           }
                           icon={<GoogleOutlined />}
                         >
@@ -204,7 +229,9 @@ const Login = () => {
                         <Button
                           shape="round"
                           href={
-                            CONSTANTS.BASEURL_API + "/auth/login?type=github"
+                            CONSTANTS.BASEURL_API +
+                            "/auth/login?type=github&redirect_uri=" +
+                            encodeURIComponent(getRedirect())
                           }
                           icon={<GithubOutlined />}
                         >

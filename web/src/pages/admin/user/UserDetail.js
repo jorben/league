@@ -137,7 +137,9 @@ const UserDetail = ({ user }) => {
             ) {
               messageApi.error(response.data?.message, () => {
                 navigate(
-                  `/login?redirect=${encodeURIComponent(window.location.href)}`
+                  `/login?redirect_uri=${encodeURIComponent(
+                    window.location.pathname
+                  )}`
                 );
               });
             } else {

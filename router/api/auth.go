@@ -16,7 +16,7 @@ import (
 
 // AuthProvider 第三方登录渠道接口
 type AuthProvider interface {
-	GetLoginUrl(ctx *gin.Context) (string, error)
+	GetLoginUrl(ctx *gin.Context, redirect string) (string, error)
 	GetUserinfo(ctx *gin.Context) (*model.UserSocialInfo, error)
 }
 
@@ -29,6 +29,12 @@ func AuthLogin(ctx *gin.Context) {
 	providerConfig := config.OAuthProvider{}
 	if len(provider) > 0 {
 		providerConfig = config.GetAuthProviderConfig(provider)
+	}
+
+	// 获取登录成功后的回调地址
+	redirect := ctx.Query("redirect_uri")
+	if len(redirect) == 0 {
+		redirect = "/"
 	}
 
 	// 创建provider实例
@@ -45,7 +51,7 @@ func AuthLogin(ctx *gin.Context) {
 	}
 
 	// 执行provider登录构造
-	url, err := oAuthClient.GetLoginUrl(ctx)
+	url, err := oAuthClient.GetLoginUrl(ctx, redirect)
 	if err != nil {
 		log.Errorf(ctx, "Get %s login url failed, err: %s", provider, err.Error())
 		c.CJSON(errs.ErrAuthLoginUrl)

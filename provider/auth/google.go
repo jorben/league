@@ -45,7 +45,8 @@ func NewGoogleOAuth(c config.OAuthProvider) *GoogleOAuth {
 	}
 }
 
-func (g *GoogleOAuth) GetLoginUrl(ctx *gin.Context) (string, error) {
+func (g *GoogleOAuth) GetLoginUrl(ctx *gin.Context, redirect string) (string, error) {
+	// 暂未找到 google auth 携带二次回调的方法，注入callback中会无法匹配
 	return g.googleOAuth2Config.AuthCodeURL(g.cfg.State), nil
 }
 

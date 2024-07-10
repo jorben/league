@@ -35,12 +35,11 @@ func NewGithubOAuth(c config.OAuthProvider) *GithubOAuth {
 	return &GithubOAuth{cfg: c}
 }
 
-func (g *GithubOAuth) GetLoginUrl(ctx *gin.Context) (string, error) {
-	cbUrl := fmt.Sprintf("%s&state=%s", g.cfg.CallbackUri, g.cfg.State)
+func (g *GithubOAuth) GetLoginUrl(ctx *gin.Context, redirect string) (string, error) {
 	return fmt.Sprintf(
 		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s",
 		g.cfg.ClientId,
-		url.QueryEscape(cbUrl),
+		url.QueryEscape(fmt.Sprintf("%s&state=%s&redirect_uri=%s", g.cfg.CallbackUri, g.cfg.State, url.QueryEscape(redirect))),
 	), nil
 }
 

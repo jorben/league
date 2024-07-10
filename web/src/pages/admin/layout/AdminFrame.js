@@ -34,7 +34,11 @@ const AdminFrame = () => {
             response.data?.code === CONSTANTS.ERRCODE.ErrAuthUnauthorized
           ) {
             messageApi.error(response.data?.message, () => {
-              navigate("/login");
+              navigate(
+                `/login?redirect_uri=${encodeURIComponent(
+                  window.location.pathname
+                )}`
+              );
             });
           } else {
             messageApi.error(response.data?.message);
