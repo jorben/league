@@ -25,6 +25,23 @@ func NewUserService(ctx *gin.Context) *UserService {
 	}
 }
 
+func (u *UserService) DeleteUser(id uint) (bool, error) {
+	// 解绑所有该用户的登录渠道
+	if _, err := u.UnbindUserSource(id, ""); err != nil {
+		return false, err
+	}
+	// 删除用户主表记录
+	result, err := u.UserDal.DeleteUser(&model.User{
+		Model: gorm.Model{ID: id},
+	})
+	if err != nil {
+		log.Errorf(u.Ctx, "Delete user failed, err: %s", err.Error())
+		return false, err
+	}
+	log.Debugf(u.Ctx, "Delete user id: %d, result: %v", id, result)
+	return result, nil
+}
+
 // UnbindUserSource 解绑用户登录渠道
 func (u *UserService) UnbindUserSource(id uint, source string) (bool, error) {
 	info := &model.UserSocialInfo{

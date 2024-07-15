@@ -260,7 +260,12 @@ const UserList = () => {
           setSearchParam({ ...searchParam });
         }}
       >
-        <UserDetail user={showUser} />
+        <UserDetail
+          user={showUser}
+          setOpenDrawer={setOpenDrawer}
+          setSearchParam={setSearchParam}
+          searchParam={searchParam}
+        />
       </Drawer>
       {contextHolder}
     </>

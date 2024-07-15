@@ -10,6 +10,7 @@ import {
   Row,
   Col,
   message,
+  Popconfirm,
 } from "antd";
 import {
   QuestionCircleOutlined,
@@ -24,7 +25,7 @@ import BrandIcon from "../../../components/BrandIcon";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 
-const UserDetail = ({ user }) => {
+const UserDetail = ({ user, setOpenDrawer, setSearchParam, searchParam }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [reload, setReload] = React.useState(false);
   const [userDetail, setUserDetail] = React.useState({
@@ -77,7 +78,7 @@ const UserDetail = ({ user }) => {
     },
   ];
 
-  const unbindSource = (source) => {
+  const unbindSource = async (source) => {
     const data = { id: userDetail?.ID, source: source };
     ApiClient.post("/admin/user/source", data)
       .then((response) => {
@@ -94,13 +95,31 @@ const UserDetail = ({ user }) => {
       });
   };
 
-  const updateStatus = (status) => {
+  const updateStatus = async (status) => {
     const data = { id: userDetail?.ID, status: status };
     ApiClient.post("/admin/user/status", data)
       .then((response) => {
         if (response.data?.code === 0) {
           setUserDetail({ ...userDetail, status: status });
           messageApi.success("状态更新成功");
+        } else {
+          messageApi.error(response.data?.message);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        messageApi.error("请求失败，请稍后重试！");
+      });
+  };
+
+  const deleteUser = async () => {
+    const data = { id: userDetail?.ID };
+    ApiClient.post("/admin/user/delete", data)
+      .then((response) => {
+        if (response.data?.code === 0) {
+          messageApi.success("删除用户成功");
+          setOpenDrawer(false);
+          setSearchParam({ ...searchParam });
         } else {
           messageApi.error(response.data?.message);
         }
@@ -287,9 +306,17 @@ const UserDetail = ({ user }) => {
           </Space>
         </Col>
         <Col span={12} style={{ textAlign: "right" }}>
-          <Button type="primary" danger icon={<DeleteOutlined />}>
-            删除用户
-          </Button>
+          <Popconfirm
+            title="温馨提示"
+            description="确认删除该用户吗，删除后将无法恢复？"
+            onConfirm={deleteUser}
+            okText="确认删除"
+            cancelText="取消"
+          >
+            <Button type="primary" danger icon={<DeleteOutlined />}>
+              删除用户
+            </Button>
+          </Popconfirm>
         </Col>
       </Row>
       {contextHolder}

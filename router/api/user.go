@@ -89,6 +89,29 @@ func UserStatus(ctx *gin.Context) {
 
 }
 
+// UserDelete 删除用户
+func UserDelete(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	param := &struct {
+		Id uint `json:"id"`
+	}{}
+	if err := ctx.ShouldBindBodyWithJSON(param); err != nil {
+		c.CJSON(errs.ErrParam, "用户id值不符合要求")
+		return
+	}
+	strId := ctx.Value("UserId").(string)
+	if strId == strconv.Itoa(int(param.Id)) {
+		c.CJSON(errs.ErrLogic, "该用户为当前账号，无法删除自己")
+		return
+	}
+	userService := service.NewUserService(ctx)
+	if _, err := userService.DeleteUser(param.Id); err != nil {
+		c.CJSON(errs.ErrDbDelete, err.Error())
+		return
+	}
+	c.CJSON(errs.Success)
+}
+
 // UserList 获取用户列表
 func UserList(ctx *gin.Context) {
 	c := context.CustomContext{Context: ctx}

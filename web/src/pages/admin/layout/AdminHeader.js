@@ -3,6 +3,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   LogoutOutlined,
+  IdcardOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -30,6 +31,9 @@ const AdminHeader = ({ collapsed, setCollapsed }) => {
 
   const menus = (
     <Space direction="vertical">
+      <Button type="text" icon={<IdcardOutlined />}>
+        个人信息
+      </Button>
       <Button
         type="text"
         icon={<LogoutOutlined />}

@@ -32,19 +32,39 @@ func (u *UserDal) UpdateUser(user *model.User) (int64, error) {
 	return result.RowsAffected, nil
 }
 
+// DeleteUser 删除用户
+func (u *UserDal) DeleteUser(user *model.User) (bool, error) {
+	result := u.db.Model(user).Delete(user)
+	if result.Error != nil {
+		return false, result.Error
+	}
+	return result.RowsAffected > 0, nil
+}
+
 // DeleteUserSource 删除用户登录渠道
 func (u *UserDal) DeleteUserSource(info *model.UserSocialInfo) (bool, error) {
 	now := time.Now()
 
 	err := u.db.Transaction(func(tx *gorm.DB) error {
-		// 更新openid，增加删除时间戳，避免软删除后唯一索引冲突
-		if err := tx.Model(info).Where("source = ? AND bind_user_id = ?", info.Source, info.BindUserId).
-			UpdateColumn("open_id", gorm.Expr("CONCAT(open_id, '-', ?)", now)).Error; err != nil {
-			return err
-		}
-		if err := tx.Where("source = ? AND bind_user_id = ?", info.Source, info.BindUserId).
-			Delete(&model.UserSocialInfo{}).Error; err != nil {
-			return err
+		if len(info.Source) > 0 {
+			// 更新openid，增加删除时间戳，避免软删除后唯一索引冲突
+			if err := tx.Model(info).Where("source = ? AND bind_user_id = ?", info.Source, info.BindUserId).
+				UpdateColumn("open_id", gorm.Expr("CONCAT(open_id, '-', ?)", now)).Error; err != nil {
+				return err
+			}
+			if err := tx.Where("source = ? AND bind_user_id = ?", info.Source, info.BindUserId).
+				Delete(&model.UserSocialInfo{}).Error; err != nil {
+				return err
+			}
+		} else {
+			if err := tx.Model(info).Where("bind_user_id = ?", info.BindUserId).
+				UpdateColumn("open_id", gorm.Expr("CONCAT(open_id, '-', ?)", now)).Error; err != nil {
+				return err
+			}
+			if err := tx.Where("bind_user_id = ?", info.BindUserId).
+				Delete(&model.UserSocialInfo{}).Error; err != nil {
+				return err
+			}
 		}
 		return nil
 	})

@@ -17,6 +17,8 @@ const (
 	ErrDbSelect = -10901 // 查询异常
 	ErrParam    = -10902 // 参数错误，缺少必要参数
 	ErrDbUpdate = -10903 // 数据库更新异常
+	ErrDbDelete = -10904 // 数据库删除异常
+	ErrLogic    = -10905 // 逻辑错误
 )
 
 // 定义错误码对应的错误描述
@@ -34,6 +36,8 @@ var errorMsg = map[int]string{
 	ErrDbSelect:            "查询失败，请稍后重试",
 	ErrParam:               "缺少必要参数或参数错误",
 	ErrDbUpdate:            "更新失败，请稍后重试",
+	ErrDbDelete:            "删除失败，请稍后重试",
+	ErrLogic:               "逻辑错误",
 }
 
 // GetErrorMsg 获取错误码对应的错误描述
