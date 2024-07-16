@@ -1,22 +1,27 @@
 import React, { useEffect, useRef, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
-import { Input, Tag, theme } from "antd";
+import { Input, Tag, theme, message } from "antd";
+import ApiClient from "../../../services/client";
 // import { TweenOneGroup } from "rc-tween-one";
-const UserDetailGroup = () => {
+const UserDetailGroup = ({ userId, group }) => {
   const { token } = theme.useToken();
-  const [tags, setTags] = useState(["Tag 1", "Tag 2", "Tag 3"]);
+  const [tags, setTags] = useState([]);
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
+  const [messageApi, contextHolder] = message.useMessage();
+
   useEffect(() => {
     if (inputVisible) {
       inputRef.current?.focus();
     }
   }, [inputVisible]);
+
+  useEffect(() => {
+    setTags(group ?? []);
+  }, [group]);
   const handleClose = (removedTag) => {
-    const newTags = tags.filter((tag) => tag !== removedTag);
-    console.log(newTags);
-    setTags(newTags);
+    exitGroup(removedTag);
   };
   const showInput = () => {
     setInputVisible(true);
@@ -26,7 +31,8 @@ const UserDetailGroup = () => {
   };
   const handleInputConfirm = () => {
     if (inputValue && tags.indexOf(inputValue) === -1) {
-      setTags([...tags, inputValue]);
+      // 加入用户组
+      joinGroup(inputValue);
     }
     setInputVisible(false);
     setInputValue("");
@@ -50,10 +56,43 @@ const UserDetailGroup = () => {
       </Tag>
     </span>
   );
-  const tagChild = tags.map(forMap);
+  const tagChild = tags ? tags.map(forMap) : "";
   const tagPlusStyle = {
     background: token.colorBgContainer,
     borderStyle: "dashed",
+  };
+  const joinGroup = async (groupName) => {
+    const data = { id: userId, group: groupName };
+    ApiClient.post("/admin/user/join_group", data)
+      .then((response) => {
+        if (response.data?.code === 0) {
+          setTags([...tags, groupName]);
+          messageApi.success("已加入角色");
+        } else {
+          messageApi.error(response.data?.message);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        messageApi.error("请求失败，请稍后重试！");
+      });
+  };
+  const exitGroup = async (groupName) => {
+    const data = { id: userId, group: groupName };
+    ApiClient.post("/admin/user/exit_group", data)
+      .then((response) => {
+        if (response.data?.code === 0) {
+          const newTags = tags.filter((tag) => tag !== groupName);
+          setTags(newTags);
+          messageApi.success("已退出角色");
+        } else {
+          messageApi.error(response.data?.message);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        messageApi.error("请求失败，请稍后重试！");
+      });
   };
   return (
     <>
@@ -83,6 +122,7 @@ const UserDetailGroup = () => {
           <PlusOutlined /> 加入角色
         </Tag>
       )}
+      {contextHolder}
     </>
   );
 };

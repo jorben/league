@@ -25,6 +25,28 @@ func NewUserService(ctx *gin.Context) *UserService {
 	}
 }
 
+// JoinGroup 加入用户组
+func (u *UserService) JoinGroup(id uint, group string) (bool, error) {
+	strId := strconv.Itoa(int(id))
+	result, err := u.CasbinDal.JoinGroups(strId, []string{group})
+	if err != nil {
+		log.Errorf(u.Ctx, "Casbin join groups failed, id: %d, group: %s, err: %s", id, group, err.Error())
+		return false, err
+	}
+	return result, nil
+}
+
+// ExitGroup 退出用户组
+func (u *UserService) ExitGroup(id uint, group string) (bool, error) {
+	strId := strconv.Itoa(int(id))
+	result, err := u.CasbinDal.ExitGroup(strId, group)
+	if err != nil {
+		log.Errorf(u.Ctx, "Casbin exit group failed, id: %d, group: %s, err: %s", id, group, err.Error())
+		return false, err
+	}
+	return result, nil
+}
+
 func (u *UserService) DeleteUser(id uint) (bool, error) {
 	// 解绑所有该用户的登录渠道
 	if _, err := u.UnbindUserSource(id, ""); err != nil {

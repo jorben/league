@@ -97,3 +97,13 @@ func (c *CasbinDal) GetUserGroup(id []string, ptype string) (map[string][]string
 	}
 	return group, nil
 }
+
+// JoinGroups 为用户加入用户组
+func (c *CasbinDal) JoinGroups(id string, groups []string) (bool, error) {
+	return c.e.AddRolesForUser(id, groups)
+}
+
+// ExitGroup 为用户退出用户组
+func (c *CasbinDal) ExitGroup(id string, groups string) (bool, error) {
+	return c.e.DeleteRoleForUser(id, groups)
+}

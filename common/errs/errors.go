@@ -11,6 +11,7 @@ const (
 	ErrAuthNoLogin         = -10005 // 未登录
 	ErrAuthUnauthorized    = -10006 // 未授权
 	ErrAuthUnexpired       = -10007 // 未过期
+	ErrAuthGroup           = -10008 //权限组操作失败
 	ErrMenu                = -10030 // 获取菜单失败
 
 	ErrNoRecord = -10900 // 没有匹配到预期的记录，无数据
@@ -31,6 +32,7 @@ var errorMsg = map[int]string{
 	ErrAuthNoLogin:         "未登录或登录态已过期",
 	ErrAuthUnauthorized:    "未授权或权限不足",
 	ErrAuthUnexpired:       "刷新登录态失败，当前登录态还有足够长的有效期",
+	ErrAuthGroup:           "用户组操作失败",
 	ErrMenu:                "获取菜单失败，请稍后重试",
 	ErrNoRecord:            "未查询到相关数据",
 	ErrDbSelect:            "查询失败，请稍后重试",

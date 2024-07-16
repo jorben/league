@@ -286,7 +286,7 @@ const UserDetail = ({ user, setOpenDrawer, setSearchParam, searchParam }) => {
         }}
       />
       <Divider orientation="left">关联角色</Divider>
-      <UserDetailGroup group={userDetail?.group} />
+      <UserDetailGroup userId={userDetail?.ID} group={userDetail?.group} />
       <Divider orientation="left">账户状态</Divider>
       <Row>
         <Col span={12}>

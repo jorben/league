@@ -112,6 +112,44 @@ func UserDelete(ctx *gin.Context) {
 	c.CJSON(errs.Success)
 }
 
+// UserJoinGroup 加入用户组
+func UserJoinGroup(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	param := &struct {
+		Id    uint   `json:"id"`
+		Group string `json:"group"`
+	}{}
+	if err := ctx.ShouldBindBodyWithJSON(param); err != nil {
+		c.CJSON(errs.ErrParam, "用户id或角色值不符合要求")
+		return
+	}
+	userService := service.NewUserService(ctx)
+	if _, err := userService.JoinGroup(param.Id, param.Group); err != nil {
+		c.CJSON(errs.ErrAuthGroup, err.Error())
+		return
+	}
+	c.CJSON(errs.Success)
+}
+
+// UserExitGroup 退出用户组
+func UserExitGroup(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	param := &struct {
+		Id    uint   `json:"id"`
+		Group string `json:"group"`
+	}{}
+	if err := ctx.ShouldBindBodyWithJSON(param); err != nil {
+		c.CJSON(errs.ErrParam, "用户id或角色值不符合要求")
+		return
+	}
+	userService := service.NewUserService(ctx)
+	if _, err := userService.ExitGroup(param.Id, param.Group); err != nil {
+		c.CJSON(errs.ErrAuthGroup, err.Error())
+		return
+	}
+	c.CJSON(errs.Success)
+}
+
 // UserList 获取用户列表
 func UserList(ctx *gin.Context) {
 	c := context.CustomContext{Context: ctx}

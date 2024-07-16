@@ -57,6 +57,8 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 	backendAdmin.POST("/user/status", api.UserStatus)
 	backendAdmin.POST("/user/source", api.UserUnbind)
 	backendAdmin.POST("/user/delete", api.UserDelete)
+	backendAdmin.POST("/user/join_group", api.UserJoinGroup)
+	backendAdmin.POST("/user/exit_group", api.UserExitGroup)
 
 	s.Use(gzip.Gzip(gzip.DefaultCompression)).StaticFS("/static", getFileSystem(feEmbed, "web/build/static"))
 	s.NoRoute(func(ctx *gin.Context) {
