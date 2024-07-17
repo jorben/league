@@ -21,7 +21,7 @@ func NewMenuDal(ctx *gin.Context) *MenuDal {
 // GetMenus 根据菜单类型获取完整菜单列表
 func (m *MenuDal) GetMenus(ctx *gin.Context, t string) ([]*model.Menu, error) {
 	var roots []*model.Menu
-	result := m.db.Where(&model.Menu{Type: t}).Where("parent = ?", "").Find(&roots)
+	result := m.db.Where(&model.Menu{Type: t}).Where("parent = ?", "").Order("`order` asc").Find(&roots)
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -35,7 +35,7 @@ func (m *MenuDal) GetMenus(ctx *gin.Context, t string) ([]*model.Menu, error) {
 }
 
 func (m *MenuDal) findChildren(parent *model.Menu) error {
-	if err := m.db.Where(&model.Menu{Parent: parent.Key, Type: parent.Type}).Find(&parent.Children).Error; err != nil {
+	if err := m.db.Where(&model.Menu{Parent: parent.Key, Type: parent.Type}).Order("`order` asc").Find(&parent.Children).Error; err != nil {
 		return err
 	}
 	for _, child := range parent.Children {

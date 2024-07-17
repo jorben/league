@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"league/dal"
@@ -25,9 +26,44 @@ func NewUserService(ctx *gin.Context) *UserService {
 	}
 }
 
+// GetGroups 获取用户组及所包含的用户ID
+func (u *UserService) GetGroups() (map[string][]string, error) {
+	groups, err := u.CasbinDal.GetAllGroups()
+	if err != nil {
+		log.Errorf(u.Ctx, "Casbin get all groups failed, err: %s", err.Error())
+		return nil, err
+	}
+	if len(groups) == 0 {
+		return nil, nil
+	}
+	result := make(map[string][]string, len(groups))
+	// 遍历用户组 获取用户
+	for _, group := range groups {
+		users, err := u.CasbinDal.GetGroupUsers(group)
+		if err != nil {
+			result[group] = nil
+			log.Errorf(u.Ctx, "Casbin get group users failed, group: %s, err: %s", group, err.Error())
+			continue
+		}
+		result[group] = users
+	}
+	return result, nil
+}
+
 // JoinGroup 加入用户组
-func (u *UserService) JoinGroup(id uint, group string) (bool, error) {
+func (u *UserService) JoinGroup(id uint, group string, newFlag bool) (bool, error) {
 	strId := strconv.Itoa(int(id))
+	if !newFlag {
+		// 非新增用户组常见 检查用户组是否存在
+		users, err := u.CasbinDal.GetGroupUsers(group)
+		if err != nil {
+			log.Errorf(u.Ctx, "Casbin get group users failed, group: %s, err: %s", group, err.Error())
+			return false, err
+		}
+		if len(users) == 0 {
+			return false, errors.New(fmt.Sprintf("%s group is not exist", group))
+		}
+	}
 	result, err := u.CasbinDal.JoinGroups(strId, []string{group})
 	if err != nil {
 		log.Errorf(u.Ctx, "Casbin join groups failed, id: %d, group: %s, err: %s", id, group, err.Error())

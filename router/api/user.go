@@ -116,15 +116,16 @@ func UserDelete(ctx *gin.Context) {
 func UserJoinGroup(ctx *gin.Context) {
 	c := context.CustomContext{Context: ctx}
 	param := &struct {
-		Id    uint   `json:"id"`
-		Group string `json:"group"`
+		Id         uint   `json:"id"`
+		Group      string `json:"group"`
+		IsNewGroup uint8  `json:"new,omitempty"`
 	}{}
 	if err := ctx.ShouldBindBodyWithJSON(param); err != nil {
 		c.CJSON(errs.ErrParam, "用户id或角色值不符合要求")
 		return
 	}
 	userService := service.NewUserService(ctx)
-	if _, err := userService.JoinGroup(param.Id, param.Group); err != nil {
+	if _, err := userService.JoinGroup(param.Id, param.Group, param.IsNewGroup != 0); err != nil {
 		c.CJSON(errs.ErrAuthGroup, err.Error())
 		return
 	}
@@ -148,6 +149,18 @@ func UserExitGroup(ctx *gin.Context) {
 		return
 	}
 	c.CJSON(errs.Success)
+}
+
+// UserGroupList 用户组列表
+func UserGroupList(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	userService := service.NewUserService(ctx)
+	groups, err := userService.GetGroups()
+	if err != nil {
+		c.CJSON(errs.ErrAuthGroup, "获取用户组失败，请稍后重试")
+		return
+	}
+	c.CJSON(errs.Success, groups)
 }
 
 // UserList 获取用户列表

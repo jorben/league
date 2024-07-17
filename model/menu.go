@@ -12,5 +12,6 @@ type Menu struct {
 	Icon     string  `gorm:"size:255;not null;default:''" json:"icon"`
 	Parent   string  `gorm:"size:255;not null;default:''" json:"-"`
 	Label    string  `gorm:"size:64;not null" json:"label"`
+	Order    int     `gorm:"not null;default:0" json:"order"`
 	Children []*Menu `gorm:"-" json:"children,omitempty"`
 }

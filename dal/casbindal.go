@@ -107,3 +107,13 @@ func (c *CasbinDal) JoinGroups(id string, groups []string) (bool, error) {
 func (c *CasbinDal) ExitGroup(id string, groups string) (bool, error) {
 	return c.e.DeleteRoleForUser(id, groups)
 }
+
+// GetGroupUsers 获取指定用户组的所有用户
+func (c *CasbinDal) GetGroupUsers(group string) ([]string, error) {
+	return c.e.GetUsersForRole(group)
+}
+
+// GetAllGroups 获取所有用户组
+func (c *CasbinDal) GetAllGroups() ([]string, error) {
+	return c.e.GetAllRoles()
+}

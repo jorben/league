@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import NotFount from "../pages/NotFount";
 import AdminDashboard from "../pages/admin/dashboard/Dashboard";
 import AdminUserList from "../pages/admin/user/UserList";
+import AdminUserGroup from "../pages/admin/user/UserGroup";
 
 export const mainRoutes = [
   {
@@ -39,6 +40,11 @@ export const adminRoutes = [
   {
     path: "/user",
     element: <AdminUserList />,
+    exact: true,
+  },
+  {
+    path: "/user/group",
+    element: <AdminUserGroup />,
     exact: true,
   },
 ];
