@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"gorm.io/gorm"
 	"league/dal"
 	"league/log"
@@ -27,7 +28,7 @@ func NewUserService(ctx *gin.Context) *UserService {
 }
 
 // GetGroups 获取用户组及所包含的用户ID
-func (u *UserService) GetGroups() (map[string][]string, error) {
+func (u *UserService) GetGroups() (map[string][]*model.User, error) {
 	groups, err := u.CasbinDal.GetAllGroups()
 	if err != nil {
 		log.Errorf(u.Ctx, "Casbin get all groups failed, err: %s", err.Error())
@@ -36,7 +37,7 @@ func (u *UserService) GetGroups() (map[string][]string, error) {
 	if len(groups) == 0 {
 		return nil, nil
 	}
-	result := make(map[string][]string, len(groups))
+	result := make(map[string][]*model.User, len(groups))
 	// 遍历用户组 获取用户
 	for _, group := range groups {
 		users, err := u.CasbinDal.GetGroupUsers(group)
@@ -45,7 +46,21 @@ func (u *UserService) GetGroups() (map[string][]string, error) {
 			log.Errorf(u.Ctx, "Casbin get group users failed, group: %s, err: %s", group, err.Error())
 			continue
 		}
-		result[group] = users
+		// 批量转换ID类型
+		idList, err := cast.ToIntSliceE(users)
+		if err != nil {
+			result[group] = nil
+			log.Errorf(u.Ctx, "user list cast failed, err: %s", err.Error())
+			continue
+		}
+		// 获取用户头像、昵称
+		userinfo, err := u.UserDal.GetUserListbyIds(idList)
+		if err != nil {
+			result[group] = nil
+			log.Errorf(u.Ctx, "get user list by ids failed, err: %s", err.Error())
+			continue
+		}
+		result[group] = userinfo
 	}
 	return result, nil
 }

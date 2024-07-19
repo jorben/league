@@ -10,15 +10,20 @@ import {
   Modal,
   message,
   Input,
+  Form,
 } from "antd";
 import { UsergroupAddOutlined, PlusOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import ApiClient from "../../../services/client";
+import CONSTANTS from "../../../constants";
 
 const UserGroup = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [groupList, setGroupList] = React.useState(null);
+  const [memberCount, setMemberCount] = React.useState(0);
 
+  const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   React.useEffect(() => {
     const getGroups = async () => {
@@ -38,8 +43,36 @@ const UserGroup = () => {
           setIsLoading(false);
         });
     };
+
+    const getMembers = async () => {
+      ApiClient.get("/admin/user/list")
+        .then((response) => {
+          if (response.data?.code === 0) {
+            setMemberCount(response.data?.data?.Count || 0);
+          } else if (
+            response.data?.code === CONSTANTS.ERRCODE.ErrAuthNoLogin ||
+            response.data?.code === CONSTANTS.ERRCODE.ErrAuthUnauthorized
+          ) {
+            messageApi.error(response.data?.message, () => {
+              navigate(
+                `/login?redirect_uri=${encodeURIComponent(
+                  window.location.pathname
+                )}`
+              );
+            });
+          } else {
+            messageApi.error(response.data?.message);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          messageApi.error("请求失败，请稍后重试！");
+        });
+    };
+
     getGroups();
-  }, [messageApi]);
+    getMembers();
+  }, [messageApi, navigate]);
 
   const loadingStyle = {
     padding: 50,
@@ -65,18 +98,19 @@ const UserGroup = () => {
           <Divider orientation="left">分组：{group}</Divider>
         </Col>
       </Row>
-      <Row>
+      <Row style={{ marginBottom: "20px" }}>
         <Col span={24}>
-          <Space>
+          <Space split={<Divider type="vertical" />}>
             {Array.isArray(users) &&
               users.length > 0 &&
               users.map((u) => (
-                <Avatar
-                  style={{ backgroundColor: "#fde3cf", color: "#f56a00" }}
-                  key={u}
-                >
-                  {u}
-                </Avatar>
+                <Space key={u.ID}>
+                  <Avatar size="large" src={u?.avatar} />
+                  <Space direction="vertical" size="4">
+                    <span>用户ID: {u?.ID}</span>
+                    <span>昵称: {u?.nickname}</span>
+                  </Space>
+                </Space>
               ))}
           </Space>
         </Col>
@@ -122,7 +156,7 @@ const UserGroup = () => {
         <Col span={24}>
           <Space>
             <Avatar style={{ backgroundColor: "#00a2ae" }}>M</Avatar>
-            <span>共计256位注册用户</span>
+            <span>共计 {memberCount} 位注册用户</span>
           </Space>
         </Col>
       </Row>
@@ -134,16 +168,32 @@ const UserGroup = () => {
         okText="确认添加"
         cancelText="取消"
       >
-        <Space direction="vertical">
-          <Space>
-            <span>组名称：</span>
-            <Input placeholder="请输入分组名称，仅支持英文字母" />
-          </Space>
-          <Space>
-            <span>用户ID：</span>
-            <Input placeholder="请输入加入该分组的用户ID" />
-          </Space>
-        </Space>
+        <Form
+          labelCol={{
+            span: 6,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+          style={{ margin: "40px 0" }}
+        >
+          <Form.Item
+            label="分组名称"
+            name="groupName"
+            rules={[{ required: true, message: "请输入分组名称" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="用户ID"
+            name="userId"
+            rules={[
+              { required: true, message: "请输入一个添加到该分组的用户ID" },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Form>
       </Modal>
       {contextHolder}
     </>

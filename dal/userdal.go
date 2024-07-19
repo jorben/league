@@ -95,6 +95,15 @@ func (u *UserDal) GetUserList(where *model.User, offset int, limit int) (*model.
 	}, nil
 }
 
+// GetUserListbyIds 根据用户ID列表获取用户基本信息
+func (u *UserDal) GetUserListbyIds(idList []int) ([]*model.User, error) {
+	var list []*model.User
+	if err := u.db.Model(&model.User{}).Where("ID IN ?", idList).Find(&list).Error; err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
 // GetUserListbySearch 用户列表查询接口
 func (u *UserDal) GetUserListbySearch(searchKey string, offset int, limit int, order []string) (*model.UserList, error) {
 	var count int64
