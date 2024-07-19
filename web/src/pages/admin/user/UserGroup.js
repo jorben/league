@@ -22,6 +22,7 @@ const UserGroup = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [groupList, setGroupList] = React.useState(null);
   const [memberCount, setMemberCount] = React.useState(0);
+  const [form] = Form.useForm();
 
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
@@ -72,7 +73,7 @@ const UserGroup = () => {
 
     getGroups();
     getMembers();
-  }, [messageApi, navigate]);
+  }, [isLoading, messageApi, navigate]);
 
   const loadingStyle = {
     padding: 50,
@@ -85,7 +86,33 @@ const UserGroup = () => {
     setIsModalOpen(true);
   };
   const handleOk = () => {
-    setIsModalOpen(false);
+    form
+      .validateFields()
+      .then((formValue) => {
+        const data = {
+          id: formValue?.userId ? Number(formValue.userId) : 0,
+          group: formValue?.groupName,
+          new: 1,
+        };
+        ApiClient.post("/admin/user/join_group", data)
+          .then((response) => {
+            if (response.data?.code === 0) {
+              messageApi.success("添加分组成功");
+              setIsLoading(true);
+            } else {
+              messageApi.error(response.data?.message);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            messageApi.error("请求失败，请稍后重试！");
+          });
+        setIsModalOpen(false);
+        form.resetFields();
+      })
+      .catch((info) => {
+        console.log("Validate Failed:", info);
+      });
   };
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -169,6 +196,7 @@ const UserGroup = () => {
         cancelText="取消"
       >
         <Form
+          form={form}
           labelCol={{
             span: 6,
           }}
@@ -180,18 +208,22 @@ const UserGroup = () => {
           <Form.Item
             label="分组名称"
             name="groupName"
-            rules={[{ required: true, message: "请输入分组名称" }]}
+            rules={[
+              { required: true, message: "请输入分组名称" },
+              { pattern: /^[A-Za-z]+$/, message: "分组名称只能包含英文字母" },
+            ]}
           >
-            <Input />
+            <Input placeholder="请输入新的分组名称" />
           </Form.Item>
           <Form.Item
             label="用户ID"
             name="userId"
             rules={[
               { required: true, message: "请输入一个添加到该分组的用户ID" },
+              { pattern: /^[1-9][0-9]*$/, message: "用户ID只能是数字" },
             ]}
           >
-            <Input />
+            <Input placeholder="请输入一个需要添加到该分组的用户ID" />
           </Form.Item>
         </Form>
       </Modal>
