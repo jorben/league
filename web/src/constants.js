@@ -7,7 +7,7 @@ const CONSTANTS = {
   STORAGE_KEY_JWT: "jwt", // jwt存储key名称
   HEADER_KEY_JWT: "X-Token", // jwt header key
   HEADER_KEY_CSRF: "X-Csrf-Token",
-  DEFAULT_PAGESIZE: 20, // 默认的pagesize
+  DEFAULT_PAGESIZE: 10, // 默认的pagesize
   USER_PROVIDER: {
     // 用户来源渠道
     WECHAT: "wechat",

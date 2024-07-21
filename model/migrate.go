@@ -9,5 +9,6 @@ func AutoMigrate() error {
 		UserSocialInfo{},
 		CasbinRule{},
 		Menu{},
+		Api{},
 	)
 }

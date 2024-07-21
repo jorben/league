@@ -25,7 +25,7 @@ const AdminFrame = () => {
     const getAdminMenus = async () => {
       ApiClient.get("/admin/menu")
         .then((response) => {
-          console.log(response.data);
+          // console.log(response.data);
           if (response.data?.code === 0) {
             setLoading(false);
             setAllMenus(response.data?.data);

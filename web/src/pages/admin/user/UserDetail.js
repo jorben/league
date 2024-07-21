@@ -80,7 +80,7 @@ const UserDetail = ({ user, setOpenDrawer, setSearchParam, searchParam }) => {
 
   const unbindSource = async (source) => {
     const data = { id: userDetail?.ID, source: source };
-    ApiClient.post("/admin/user/source", data)
+    ApiClient.post("/admin/user/unbind", data)
       .then((response) => {
         if (response.data?.code === 0) {
           setReload(true);

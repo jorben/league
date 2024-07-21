@@ -5,6 +5,7 @@ import NotFount from "../pages/NotFount";
 import AdminDashboard from "../pages/admin/dashboard/Dashboard";
 import AdminUserList from "../pages/admin/user/UserList";
 import AdminUserGroup from "../pages/admin/user/UserGroup";
+import AdminSettingApi from "../pages/admin/setting/Api";
 
 export const mainRoutes = [
   {
@@ -45,6 +46,11 @@ export const adminRoutes = [
   {
     path: "/user/group",
     element: <AdminUserGroup />,
+    exact: true,
+  },
+  {
+    path: "/setting/api",
+    element: <AdminSettingApi />,
     exact: true,
   },
 ];

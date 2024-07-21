@@ -55,11 +55,14 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 	backendAdmin.GET("/user/list", api.UserList)
 	backendAdmin.GET("/user/detail", api.UserDetail)
 	backendAdmin.POST("/user/status", api.UserStatus)
-	backendAdmin.POST("/user/source", api.UserUnbind)
+	backendAdmin.POST("/user/unbind", api.UserUnbind)
 	backendAdmin.POST("/user/delete", api.UserDelete)
 	backendAdmin.POST("/user/join_group", api.UserJoinGroup)
 	backendAdmin.POST("/user/exit_group", api.UserExitGroup)
 	backendAdmin.GET("/group/list", api.UserGroupList)
+	backendAdmin.GET("/setting/apilist", api.SettingApiList)
+	backendAdmin.POST("/setting/api", api.SettingUpdateApi)
+	backendAdmin.POST("/setting/api/delete", api.SettingDeleteApi)
 
 	s.Use(gzip.Gzip(gzip.DefaultCompression)).StaticFS("/static", getFileSystem(feEmbed, "web/build/static"))
 	s.NoRoute(func(ctx *gin.Context) {

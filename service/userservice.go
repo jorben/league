@@ -18,7 +18,7 @@ type UserService struct {
 	CasbinDal *dal.CasbinDal
 }
 
-// NewUserService 新建AuthService实例
+// NewUserService 新建UserService实例
 func NewUserService(ctx *gin.Context) *UserService {
 	return &UserService{
 		Ctx:       ctx,
