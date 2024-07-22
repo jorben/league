@@ -264,20 +264,26 @@ const Api = () => {
   };
 
   const handleModalOk = async () => {
-    const row = await newForm.validateFields();
-    ApiClient.post("/admin/setting/api", row)
-      .then((response) => {
-        if (response.data?.code === 0) {
-          messageApi.success("新增接口成功");
-          setIsModalOpen(false);
-          setSearchParam({ ...searchParam });
-        } else {
-          messageApi.error(response.data?.message);
-        }
+    newForm
+      .validateFields()
+      .then((row) => {
+        ApiClient.post("/admin/setting/api", row)
+          .then((response) => {
+            if (response.data?.code === 0) {
+              messageApi.success("新增接口成功");
+              setIsModalOpen(false);
+              setSearchParam({ ...searchParam });
+            } else {
+              messageApi.error(response.data?.message);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            messageApi.error("新增接口失败，请稍后重试！");
+          });
       })
-      .catch((error) => {
-        console.log(error);
-        messageApi.error("新增接口失败，请稍后重试！");
+      .catch((info) => {
+        console.log("Validate Failed:", info);
       });
   };
 
@@ -335,9 +341,9 @@ const Api = () => {
               pagination={{
                 pageSize: searchParam.size,
                 current: searchParam.page,
-                simple: true,
-                showSizeChanger: false,
-                hideOnSinglePage: true,
+                // simple: false,
+                showSizeChanger: true,
+                hideOnSinglePage: false,
                 total: dataSource.Count,
                 onChange: (page, size) => {
                   setEditingKey(0);

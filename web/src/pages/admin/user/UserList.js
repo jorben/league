@@ -212,9 +212,9 @@ const UserList = () => {
                 pagination={{
                   pageSize: searchParam.size,
                   current: searchParam.page,
-                  simple: true,
-                  showSizeChanger: false,
-                  hideOnSinglePage: true,
+                  // simple: true,
+                  showSizeChanger: true,
+                  // hideOnSinglePage: true,
                   total: userList.Count,
                   onChange: (page, size) =>
                     setSearchParam({ ...searchParam, page: page, size: size }),
