@@ -5,7 +5,11 @@ import NotFount from "../pages/NotFount";
 import AdminDashboard from "../pages/admin/dashboard/Dashboard";
 import AdminUserList from "../pages/admin/user/UserList";
 import AdminUserGroup from "../pages/admin/user/UserGroup";
-import AdminSettingApi from "../pages/admin/setting/Api";
+import AdminSettingApi from "../pages/admin/setting/SettingApi";
+import AdminSettingMenu from "../pages/admin/setting/SettingMenu";
+import AdminPermissionApi from "../pages/admin/permission/PermissionApi";
+import AdminPermissionMenu from "../pages/admin/permission/PermissionMenu";
+import AdminPermissionData from "../pages/admin/permission/PermissionData";
 
 export const mainRoutes = [
   {
@@ -49,8 +53,28 @@ export const adminRoutes = [
     exact: true,
   },
   {
+    path: "/permission/menu",
+    element: <AdminPermissionMenu />,
+    exact: true,
+  },
+  {
+    path: "/permission/api",
+    element: <AdminPermissionApi />,
+    exact: true,
+  },
+  {
+    path: "/permission/data",
+    element: <AdminPermissionData />,
+    exact: true,
+  },
+  {
     path: "/setting/api",
     element: <AdminSettingApi />,
+    exact: true,
+  },
+  {
+    path: "/setting/menu",
+    element: <AdminSettingMenu />,
     exact: true,
   },
 ];

@@ -17,7 +17,7 @@ import { ApiOutlined, PlusOutlined } from "@ant-design/icons";
 import ApiClient from "../../../services/client";
 import CONSTANTS from "../../../constants";
 
-const Api = () => {
+const SettingApi = () => {
   const [editForm] = Form.useForm();
   const [newForm] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
@@ -375,7 +375,7 @@ const Api = () => {
           <Form.Item
             label="接口名称"
             name="name"
-            rules={[{ required: true, message: "请输入分组名称" }]}
+            rules={[{ required: true, message: "请输入接口名称" }]}
           >
             <Input placeholder="请输入新的接口名称" />
           </Form.Item>
@@ -422,4 +422,4 @@ const Api = () => {
   );
 };
 
-export default Api;
+export default SettingApi;
