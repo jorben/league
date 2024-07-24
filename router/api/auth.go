@@ -146,3 +146,15 @@ func AuthRenew(ctx *gin.Context) {
 func AuthLogout(ctx *gin.Context) {
 
 }
+
+// AuthPolicyList 获取权限策略列表
+func AuthPolicyList(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	authService := service.NewAuthService(ctx)
+	list, err := authService.GetPolicyList()
+	if err != nil {
+		c.CJSON(errs.ErrDbSelect, "策略列表查询失败")
+		return
+	}
+	c.CJSON(errs.Success, list)
+}

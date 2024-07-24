@@ -18,3 +18,12 @@ type CasbinReq struct {
 	Path   string // the resource that is going to be accessed.
 	Method string // the operation that the user performs on the resource.
 }
+
+type Policy struct {
+	ID       uint   `json:"ID"`
+	Subject  string `json:"subject"`   // 用户或用户组
+	Path     string `json:"path"`      // 路径
+	PathName string `json:"path_name"` // 路径名称
+	Method   string `json:"method"`    // 请求方法
+	Result   string `json:"result"`    // 判定结论 allow or deny
+}

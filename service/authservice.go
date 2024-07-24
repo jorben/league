@@ -122,3 +122,42 @@ func (a *AuthService) VerifyJwtString(s string) (*AuthToken, error) {
 }
 
 // TODO: jwt失效逻辑，token续签
+
+// GetPolicyList 获取策略列表
+func (a *AuthService) GetPolicyList() (map[string][]*model.Policy, error) {
+
+	rules, err := a.CasbinDal.GetRules(&model.CasbinRule{Ptype: "p"})
+	if err != nil {
+		log.Errorf(a.Ctx, "Casbin get rules failed, err: %s", err.Error())
+		return nil, err
+	}
+	// 批量获取接口列表
+	mapApiName := make(map[string]string)
+	settingService := NewSettingService(a.Ctx)
+	apis, err := settingService.GetApiList(0, 9999)
+	if apis != nil {
+		for _, api := range apis.List {
+			mapApiName[fmt.Sprintf("%s-%s", api.Method, api.Path)] = api.Name
+		}
+	}
+	result := make(map[string][]*model.Policy)
+	for _, rule := range rules {
+		policy := &model.Policy{}
+		policy.ID = rule.ID
+		policy.Subject = rule.V0
+		policy.Path = rule.V1
+		policy.Method = rule.V2
+		policy.Result = rule.V3
+		if name, ok := mapApiName[fmt.Sprintf("%s-%s", policy.Method, policy.Path)]; ok {
+			policy.PathName = name
+		}
+		if list, exists := result[policy.Subject]; exists {
+			list = append(list, policy)
+			result[policy.Subject] = list
+		} else {
+			result[policy.Subject] = []*model.Policy{policy}
+		}
+	}
+
+	return result, nil
+}
