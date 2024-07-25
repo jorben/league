@@ -117,3 +117,17 @@ func (c *CasbinDal) GetGroupUsers(group string) ([]string, error) {
 func (c *CasbinDal) GetAllGroups() ([]string, error) {
 	return c.e.GetAllRoles()
 }
+
+// SaveRule 更新规则，会更新零值，无主键则创建记录
+func (c *CasbinDal) SaveRule(rule *model.CasbinRule) (uint, error) {
+	result := c.db.Model(rule).Save(rule)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return rule.ID, nil
+}
+
+// DeleteRule 删除规则
+func (c *CasbinDal) DeleteRule(rule *model.CasbinRule) error {
+	return c.db.Where(rule).Delete(rule).Error
+}

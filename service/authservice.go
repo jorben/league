@@ -123,6 +123,38 @@ func (a *AuthService) VerifyJwtString(s string) (*AuthToken, error) {
 
 // TODO: jwt失效逻辑，token续签
 
+// SavePolicy 更新或创建权限规则
+func (a *AuthService) SavePolicy(policy *model.Policy) (bool, error) {
+	rule := &model.CasbinRule{
+		ID:      policy.ID,
+		Ptype:   "p",
+		V0:      policy.Subject,
+		V1:      policy.Path,
+		V2:      policy.Method,
+		V3:      policy.Result,
+		Comment: policy.Comment,
+	}
+	id, err := a.CasbinDal.SaveRule(rule)
+	if err != nil {
+		log.Errorf(a.Ctx, "Save policy failed, err: %s", err.Error())
+		return false, err
+	}
+	return id > 0, nil
+}
+
+// DeletePolicy 删除权限规则
+func (a *AuthService) DeletePolicy(id uint) error {
+	rule := &model.CasbinRule{
+		ID: id,
+	}
+	err := a.CasbinDal.DeleteRule(rule)
+	if err != nil {
+		log.Errorf(a.Ctx, "Delete policy failed, err: %s", err.Error())
+		return err
+	}
+	return nil
+}
+
 // GetPolicyList 获取策略列表
 func (a *AuthService) GetPolicyList() (map[string][]*model.Policy, error) {
 
@@ -148,6 +180,7 @@ func (a *AuthService) GetPolicyList() (map[string][]*model.Policy, error) {
 		policy.Path = rule.V1
 		policy.Method = rule.V2
 		policy.Result = rule.V3
+		policy.Comment = rule.Comment
 		if name, ok := mapApiName[fmt.Sprintf("%s-%s", policy.Method, policy.Path)]; ok {
 			policy.PathName = name
 		}

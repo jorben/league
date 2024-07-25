@@ -288,20 +288,26 @@ const SettingApi = () => {
   };
 
   const handleSave = async () => {
-    const row = await editForm.validateFields();
-    ApiClient.post("/admin/setting/api", row)
-      .then((response) => {
-        if (response.data?.code === 0) {
-          messageApi.success("接口信息更新成功");
-          setSearchParam({ ...searchParam });
-          setEditingKey(0);
-        } else {
-          messageApi.error(response.data?.message);
-        }
+    editForm
+      .validateFields()
+      .then((row) => {
+        ApiClient.post("/admin/setting/api", row)
+          .then((response) => {
+            if (response.data?.code === 0) {
+              messageApi.success("接口信息更新成功");
+              setSearchParam({ ...searchParam });
+              setEditingKey(0);
+            } else {
+              messageApi.error(response.data?.message);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            messageApi.error("更新接口信息失败，请稍后重试！");
+          });
       })
       .catch((error) => {
         console.log(error);
-        messageApi.error("更新接口信息失败，请稍后重试！");
       });
   };
 

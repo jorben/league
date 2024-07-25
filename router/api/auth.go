@@ -158,3 +158,39 @@ func AuthPolicyList(ctx *gin.Context) {
 	}
 	c.CJSON(errs.Success, list)
 }
+
+// AuthUpdatePolicy 创建/更新权限规则
+func AuthUpdatePolicy(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	param := &model.Policy{}
+	if err := ctx.ShouldBindBodyWithJSON(param); err != nil {
+		c.CJSON(errs.ErrParam, "权限规则不符合要求")
+		return
+	}
+	authService := service.NewAuthService(ctx)
+	_, err := authService.SavePolicy(param)
+	if err != nil {
+		c.CJSON(errs.ErrDbUpdate)
+		return
+	}
+	c.CJSON(errs.Success)
+}
+
+// AuthDeletePolicy 删除权限规则
+func AuthDeletePolicy(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	param := &struct {
+		ID uint `json:"ID"`
+	}{}
+	if err := ctx.ShouldBindBodyWithJSON(param); err != nil || param.ID == 0 {
+		c.CJSON(errs.ErrParam, "规则ID不符合要求")
+		return
+	}
+	authService := service.NewAuthService(ctx)
+	err := authService.DeletePolicy(param.ID)
+	if err != nil {
+		c.CJSON(errs.ErrDbDelete, "删除规则失败")
+		return
+	}
+	c.CJSON(errs.Success)
+}
