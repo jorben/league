@@ -6,11 +6,11 @@ const (
 )
 
 type Menu struct {
-	ID       uint    `gorm:"primarykey" json:"-"`
+	ID       uint    `gorm:"primarykey" json:"id"`
 	Key      string  `gorm:"uniqueIndex:idx_key_type;size:255;not null" json:"key"`
 	Type     string  `gorm:"uniqueIndex:idx_key_type;size:64;not null" json:"-"`
 	Icon     string  `gorm:"size:255;not null;default:''" json:"icon"`
-	Parent   string  `gorm:"size:255;not null;default:''" json:"-"`
+	Parent   string  `gorm:"size:255;not null;default:''" json:"parent"`
 	Label    string  `gorm:"size:64;not null" json:"label"`
 	Order    int     `gorm:"not null;default:0" json:"order"`
 	Children []*Menu `gorm:"-" json:"children,omitempty"`

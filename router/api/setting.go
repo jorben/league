@@ -70,3 +70,15 @@ func SettingDeleteApi(ctx *gin.Context) {
 	}
 	c.CJSON(errs.Success)
 }
+
+// SettingMenuList 获取全部菜单
+func SettingMenuList(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	menuService := service.NewMenuService(ctx)
+	menus, err := menuService.GetAllMenus()
+	if err != nil {
+		c.CJSON(errs.ErrDbSelect, "菜单查询失败")
+		return
+	}
+	c.CJSON(errs.Success, menus)
+}

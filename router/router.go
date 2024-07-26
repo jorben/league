@@ -63,6 +63,7 @@ func SetupRouter(s *gin.Engine, feEmbed embed.FS) {
 	backendAdmin.GET("/setting/apilist", api.SettingApiList)
 	backendAdmin.POST("/setting/api", api.SettingUpdateApi)
 	backendAdmin.POST("/setting/api/delete", api.SettingDeleteApi)
+	backendAdmin.GET("/setting/menulist", api.SettingMenuList)
 	backendAdmin.GET("/auth/policylist", api.AuthPolicyList)
 	backendAdmin.POST("/auth/policy", api.AuthUpdatePolicy)
 	backendAdmin.POST("/auth/policy/delete", api.AuthDeletePolicy)

@@ -1,8 +1,64 @@
 import React from "react";
-import { Row, Col, Space, Button } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Row, Col, Space, Button, Tabs, message } from "antd";
 import { PlusOutlined, MenuOutlined } from "@ant-design/icons";
+import ApiClient from "../../../services/client";
+import CONSTANTS from "../../../constants";
+import SettingMenuTable from "./SettingMenuTable";
 
 const SettingMenu = () => {
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  const [tabItems, setTabItems] = React.useState([]);
+  const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const getAllMenus = async () => {
+      ApiClient.get("/admin/setting/menulist")
+        .then((response) => {
+          if (response.data?.code === 0) {
+            const data = Object.entries(response.data?.data).map(
+              ([t, menus]) => ({
+                key: t,
+                label: t,
+                children: (
+                  <SettingMenuTable
+                    type={t}
+                    menus={menus}
+                    isLoading={isLoading}
+                    setIsLoading={setIsLoading}
+                  />
+                ),
+              })
+            );
+            setTabItems(data);
+          } else if (
+            response.data?.code === CONSTANTS.ERRCODE.ErrAuthNoLogin ||
+            response.data?.code === CONSTANTS.ERRCODE.ErrAuthUnauthorized
+          ) {
+            messageApi.error(response.data?.message, () => {
+              navigate(
+                `/login?redirect_uri=${encodeURIComponent(
+                  window.location.pathname
+                )}`
+              );
+            });
+          } else {
+            messageApi.error(response.data?.message);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          messageApi.error("请求失败，请稍后重试！");
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    };
+    getAllMenus();
+  }, [isLoading, messageApi, navigate]);
+
   return (
     <>
       <Row>
@@ -25,7 +81,12 @@ const SettingMenu = () => {
           </Button>
         </Col>
       </Row>
-      <Row></Row>
+      <Row>
+        <Col span={24}>
+          <Tabs items={tabItems} tabPosition="top" type="line" />
+        </Col>
+      </Row>
+      {contextHolder}
     </>
   );
 };
