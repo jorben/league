@@ -1,38 +1,48 @@
 import React from "react";
-import { Space, Button, Form, Input, Table, Popconfirm, message } from "antd";
+import {
+  Space,
+  Button,
+  Form,
+  Input,
+  Table,
+  Popconfirm,
+  InputNumber,
+  message,
+} from "antd";
 import ApiClient from "../../../services/client";
+import * as Icons from "@ant-design/icons";
 
-const SettingMenuTable = ({ type, menus, isLoading, setIsLoading }) => {
+const SettingMenuTable = ({ menus, isLoading, setIsLoading }) => {
   const [editForm] = Form.useForm();
   const [editingKey, setEditingKey] = React.useState(0);
-  const isEditing = (record) => record.id === editingKey;
+  const isEditing = (record) => record.ID === editingKey;
   const [messageApi, contextHolder] = message.useMessage();
   const columns = [
     {
       title: "菜单名称",
       dataIndex: "label",
-      width: 400,
+      width: 360,
       fixed: "left",
       render: (text, record) => {
         return isEditing(record) ? (
           <>
             <Form.Item
-              name="id"
+              name="ID"
               style={{
                 margin: 0,
               }}
               hidden={true}
             >
-              <Input value={text} />
+              <Input value={record.ID} />
             </Form.Item>
             <Form.Item
-              name="parent"
+              name="type"
               style={{
                 margin: 0,
               }}
               hidden={true}
             >
-              <Input value={record?.parent} />
+              <Input value={record.type} />
             </Form.Item>
             <Form.Item
               name="label"
@@ -55,6 +65,27 @@ const SettingMenuTable = ({ type, menus, isLoading, setIsLoading }) => {
       },
     },
     {
+      title: "父节点Path",
+      dataIndex: "parent",
+      width: 180,
+      render: (text, record) => {
+        return isEditing(record) ? (
+          <Form.Item
+            name="parent"
+            style={{
+              margin: 0,
+            }}
+          >
+            <Input placeholder="一级菜单请留空" value={text} />
+          </Form.Item>
+        ) : (
+          <Space>
+            <span>{text}</span>
+          </Space>
+        );
+      },
+    },
+    {
       title: "菜单Icon",
       dataIndex: "icon",
       width: 180,
@@ -69,7 +100,10 @@ const SettingMenuTable = ({ type, menus, isLoading, setIsLoading }) => {
             <Input />
           </Form.Item>
         ) : (
-          <span>{text}</span>
+          <Space>
+            {text ? React.createElement(Icons[text] || null) : null}
+            <span>{text}</span>
+          </Space>
         );
       },
     },
@@ -116,7 +150,7 @@ const SettingMenuTable = ({ type, menus, isLoading, setIsLoading }) => {
               { pattern: /^[0-9]+$/, message: "排序只能是数字" },
             ]}
           >
-            <Input />
+            <InputNumber min={0} />
           </Form.Item>
         ) : (
           <span>{text}</span>
@@ -170,13 +204,13 @@ const SettingMenuTable = ({ type, menus, isLoading, setIsLoading }) => {
   ];
 
   const handleEdit = (record) => {
-    setEditingKey(record.id);
+    setEditingKey(record.ID);
     editForm.setFieldsValue({ ...record });
   };
 
   const handleDelete = async (record) => {
     const data = { ID: record.ID };
-    ApiClient.post("/admin/menu/delete", data)
+    ApiClient.post("/admin/setting/menu/delete", data)
       .then((response) => {
         if (response.data?.code === 0) {
           messageApi.success("菜单删除成功");
@@ -195,7 +229,7 @@ const SettingMenuTable = ({ type, menus, isLoading, setIsLoading }) => {
     editForm
       .validateFields()
       .then((row) => {
-        ApiClient.post("/admin/menu", row)
+        ApiClient.post("/admin/setting/menu", row)
           .then((response) => {
             if (response.data?.code === 0) {
               messageApi.success("菜单更新成功");

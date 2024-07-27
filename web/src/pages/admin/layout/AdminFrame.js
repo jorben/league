@@ -28,6 +28,7 @@ const AdminFrame = () => {
           // console.log(response.data);
           if (response.data?.code === 0) {
             setAllMenus(response.data?.data);
+            setLoading(false);
           } else if (
             response.data?.code === CONSTANTS.ERRCODE.ErrAuthNoLogin ||
             response.data?.code === CONSTANTS.ERRCODE.ErrAuthUnauthorized
@@ -46,9 +47,6 @@ const AdminFrame = () => {
         .catch((error) => {
           console.log(error);
           messageApi.error("请求失败，请稍后重试！");
-        })
-        .finally(() => {
-          setLoading(false);
         });
     };
     getAdminMenus();

@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Row, Col, Space, Button, Tabs, message } from "antd";
-import { PlusOutlined, MenuOutlined } from "@ant-design/icons";
+import { PlusOutlined, MenuOutlined, NumberOutlined } from "@ant-design/icons";
 import ApiClient from "../../../services/client";
 import CONSTANTS from "../../../constants";
 import SettingMenuTable from "./SettingMenuTable";
@@ -21,10 +21,11 @@ const SettingMenu = () => {
             const data = Object.entries(response.data?.data).map(
               ([t, menus]) => ({
                 key: t,
-                label: t,
+                label:
+                  t === "admin" ? "后台菜单" : t === "index" ? "前台菜单" : t,
+                icon: <NumberOutlined />,
                 children: (
                   <SettingMenuTable
-                    type={t}
                     menus={menus}
                     isLoading={isLoading}
                     setIsLoading={setIsLoading}
@@ -83,7 +84,7 @@ const SettingMenu = () => {
       </Row>
       <Row>
         <Col span={24}>
-          <Tabs items={tabItems} tabPosition="top" type="line" />
+          <Tabs items={tabItems} tabPosition="left" type="line" />
         </Col>
       </Row>
       {contextHolder}

@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/gin-gonic/gin"
+	"league/common/errs"
 	"league/dal"
 	"league/log"
 	"league/model"
@@ -50,4 +51,43 @@ func (m *MenuService) GetAllMenus() (map[string][]*model.Menu, error) {
 		result[menuType] = menus
 	}
 	return result, nil
+}
+
+// SaveMenu 创建/更新菜单项
+func (m *MenuService) SaveMenu(menu *model.Menu) (bool, error) {
+	// parent不为空 则检查parent是否存在
+	if len(menu.Parent) > 0 {
+		_, err := m.MenuDal.GetMenuItem(&model.Menu{Key: menu.Parent, Type: menu.Type})
+		if err != nil {
+			log.Errorf(m.Ctx, "Query parent failed, err: %s", err.Error())
+			return false, err
+		}
+	}
+	id, err := m.MenuDal.SaveMenu(menu)
+	if err != nil {
+		log.Errorf(m.Ctx, "Save menu failed, err: %s", err.Error())
+		return false, err
+	}
+	return id > 0, nil
+}
+
+// DeleteMenu 删除菜单项
+func (m *MenuService) DeleteMenu(id uint) error {
+	menu := &model.Menu{
+		ID: id,
+	}
+	hasChildren, err := m.MenuDal.HasChildren(menu)
+	if err != nil {
+		log.Errorf(m.Ctx, "Query children failed, err: %s", err.Error())
+		return err
+	}
+	if hasChildren {
+		return errs.ErrorHasChildren
+	}
+	err = m.MenuDal.DeleteMenu(menu)
+	if err != nil {
+		log.Errorf(m.Ctx, "Delete menu failed, err: %s", err.Error())
+		return err
+	}
+	return nil
 }

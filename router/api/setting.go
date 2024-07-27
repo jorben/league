@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"league/common"
 	"league/common/context"
@@ -81,4 +82,52 @@ func SettingMenuList(ctx *gin.Context) {
 		return
 	}
 	c.CJSON(errs.Success, menus)
+}
+
+// SettingUpdateMenu 创建/更新菜单项
+func SettingUpdateMenu(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	param := &model.Menu{}
+	if err := ctx.ShouldBindBodyWithJSON(param); err != nil {
+		c.CJSON(errs.ErrParam, "菜单项信息不符合要求")
+		return
+	}
+	if len(param.Key) == 0 || len(param.Type) == 0 || len(param.Label) == 0 {
+		c.CJSON(errs.ErrParam, "缺少必要的菜单信息")
+		return
+	}
+	menuService := service.NewMenuService(ctx)
+	_, err := menuService.SaveMenu(param)
+	if err != nil {
+		if errors.Is(err, errs.ErrorRecordNotFound) {
+			c.CJSON(errs.ErrLogic, "菜单父节点不存在，请检查")
+			return
+		}
+		c.CJSON(errs.ErrDbUpdate)
+		return
+	}
+	c.CJSON(errs.Success)
+}
+
+// SettingDeleteMenu 删除菜单项
+func SettingDeleteMenu(ctx *gin.Context) {
+	c := context.CustomContext{Context: ctx}
+	param := &struct {
+		ID uint `json:"ID"`
+	}{}
+	if err := ctx.ShouldBindBodyWithJSON(param); err != nil || param.ID == 0 {
+		c.CJSON(errs.ErrParam, "菜单项ID不符合要求")
+		return
+	}
+	menuService := service.NewMenuService(ctx)
+	err := menuService.DeleteMenu(param.ID)
+	if err != nil {
+		if errors.Is(err, errs.ErrorHasChildren) {
+			c.CJSON(errs.ErrLogic, "该菜单含有子菜单，无法直接删除")
+			return
+		}
+		c.CJSON(errs.ErrDbDelete, "删除菜单项失败")
+		return
+	}
+	c.CJSON(errs.Success)
 }

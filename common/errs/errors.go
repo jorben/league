@@ -1,5 +1,13 @@
 package errs
 
+import "errors"
+
+// 定义特定error
+var (
+	ErrorHasChildren    = errors.New("has children")
+	ErrorRecordNotFound = errors.New("record not found")
+)
+
 // 定义业务错误码
 const (
 	Success = 0 // 成功

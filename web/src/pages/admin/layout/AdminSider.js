@@ -17,7 +17,8 @@ const AdminSider = ({ collapsed, allMenus }) => {
   // }
   const transformMenuIcons = (menus) => {
     return menus.map((item) => ({
-      ...item,
+      key: item.key,
+      label: item.label,
       icon: item.icon ? React.createElement(Icons[item.icon] || null) : null,
       ...(item.children && { children: transformMenuIcons(item.children) }),
     }));
