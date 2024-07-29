@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.5] - 2024-07-29
+### :sparkles: New Features
+- [`6d8135e`](https://github.com/jorben/league/commit/6d8135e097b6b709f1a9f6251e8bb57de238ca4e) - 完成用户组页面功能 *(commit by [@jorben](https://github.com/jorben))*
+- [`a137ad7`](https://github.com/jorben/league/commit/a137ad7c55c6432a66c1f7eeca93ef6a5bcce4ab) - 完成接口管理，支持新增、编辑、删除接口 *(commit by [@jorben](https://github.com/jorben))*
+- [`1033844`](https://github.com/jorben/league/commit/1033844665baf3d8a27e53f7b854502f3b9b1ff8) - 完成管理后台接口权限页面及功能 *(commit by [@jorben](https://github.com/jorben))*
+- [`c189673`](https://github.com/jorben/league/commit/c1896730542769a5ec49b43afcd381f32e80ee3a) - 完成管理后台菜单设置页面及菜单项增、删、改功能 *(commit by [@jorben](https://github.com/jorben))*
+
+### :bug: Bug Fixes
+- [`d2b3578`](https://github.com/jorben/league/commit/d2b357828cb8e0dfb80e6831fd47fdeba63829a2) - 修复新增接口必填数据未填写提交报错问题 *(commit by [@jorben](https://github.com/jorben))*
+
+### :wrench: Chores
+- [`a0ab726`](https://github.com/jorben/league/commit/a0ab726fb588d62bd01130cd11558dd109c6d7bd) - 增加用户组页面，加入用户组支持指定是否新增用户组 *(commit by [@jorben](https://github.com/jorben))*
+- [`affd4d5`](https://github.com/jorben/league/commit/affd4d5221fdce184f18fa95039f155038f4da30) - 增加用户组页面，加入用户组支持指定是否新增用户组 *(commit by [@jorben](https://github.com/jorben))*
+- [`73473e9`](https://github.com/jorben/league/commit/73473e9a7a31401343c25b6c62c8b8ea84a10342) - 部分完成用户组页面数据展示 *(commit by [@jorben](https://github.com/jorben))*
+- [`03bdc4d`](https://github.com/jorben/league/commit/03bdc4def92b50c73c22250a218024fc1dd597d7) - 挑战接口页文件命名，新增权限管理相关页面 *(commit by [@jorben](https://github.com/jorben))*
+- [`42e5177`](https://github.com/jorben/league/commit/42e51775cd18fa0fb1233964472db41ae023d69d) - 增加获取权限规则接口，接口权限页面展示各分组规则列表 *(commit by [@jorben](https://github.com/jorben))*
+- [`f398e26`](https://github.com/jorben/league/commit/f398e26778dd1fb52a2280a442180d602a7db3d1) - 管理后台菜单设置页面完成数据展示 *(commit by [@jorben](https://github.com/jorben))*
+- [`d6c20c8`](https://github.com/jorben/league/commit/d6c20c8f659b434ebfdd10efe30c9f036264927e) - 管理后台菜单设置页完成数据编辑、删除功能 *(commit by [@jorben](https://github.com/jorben))*
+
+
 ## [0.0.4] - 2024-07-16
 ### :sparkles: New Features
 - [`5597de8`](https://github.com/jorben/league/commit/5597de85b4758bb3d1d7b62ba81d978f5f75024f) - 增加用户基本信息接口，管理后台头部调用用户信息 *(commit by [@jorben](https://github.com/jorben))*
@@ -44,3 +64,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.0.3]: https://github.com/jorben/league/compare/0.0.2...0.0.3
 [0.0.4]: https://github.com/jorben/league/compare/0.0.3...0.0.4
+[0.0.5]: https://github.com/jorben/league/compare/0.0.4...0.0.5
