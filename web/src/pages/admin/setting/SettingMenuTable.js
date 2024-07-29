@@ -22,7 +22,7 @@ const SettingMenuTable = ({ menus, isLoading, setIsLoading }) => {
       title: "菜单名称",
       dataIndex: "label",
       width: 360,
-      fixed: "left",
+      // fixed: "left",
       render: (text, record) => {
         return isEditing(record) ? (
           <>
@@ -134,7 +134,7 @@ const SettingMenuTable = ({ menus, isLoading, setIsLoading }) => {
     {
       title: "排序",
       dataIndex: "order",
-      width: 100,
+      width: 110,
       render: (text, record) => {
         return isEditing(record) ? (
           <Form.Item
@@ -150,7 +150,7 @@ const SettingMenuTable = ({ menus, isLoading, setIsLoading }) => {
               { pattern: /^[0-9]+$/, message: "排序只能是数字" },
             ]}
           >
-            <InputNumber min={0} />
+            <InputNumber defaultValue={1} min={0} />
           </Form.Item>
         ) : (
           <span>{text}</span>
@@ -250,12 +250,15 @@ const SettingMenuTable = ({ menus, isLoading, setIsLoading }) => {
   };
   return (
     <>
-      <Form form={editForm} component={false}>
+      <Form form={editForm} component={false} initialValues={{ order: 1 }}>
         <Table
           columns={columns}
           dataSource={menus}
           loading={isLoading}
           pagination={false}
+          scroll={{
+            x: "100%",
+          }}
         />
       </Form>
       {contextHolder}
