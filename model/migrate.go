@@ -10,5 +10,7 @@ func AutoMigrate() error {
 		CasbinRule{},
 		Menu{},
 		Api{},
+		DataRule{},
+		FieldRule{},
 	)
 }
